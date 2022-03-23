@@ -1,13 +1,17 @@
 <script setup lang="ts">
+import {onBeforeUpdate} from "vue";
+
+const props = defineProps(["openTextFile"]);
+onBeforeUpdate(() => console.log("Sidebar will update", props))
 </script>
 
 <template>
   <div class="sidebar">
     <div class="sidebar-group">
-      <h3>Text File</h3>
+      <h3>{{ props.openTextFile }}</h3>
       <h4>Audio File</h4>
 <!--      <AudioPlayer {...this.props.audio}/>-->
-      <button>Open Files</button>
+      <button @click="$emit('openFiles')">Open Files</button>
       <input
           placeholder="Language"
           type="text"
