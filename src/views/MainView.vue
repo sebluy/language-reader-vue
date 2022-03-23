@@ -13,6 +13,8 @@ let languageText;
 
 const state = reactive({
   openTextFile: "",
+  openAudioFile: "",
+  audioSrc: "",
   sentences: [],
 });
 
@@ -25,6 +27,11 @@ const load = async () => {
     languageText = await createLanguageText(runtimeData, text);
     state.sentences = languageText.sentences;
     state.openTextFile = runtimeData.openTextFile;
+  }
+  if (runtimeData.openAudioFile) {
+    let audio = await db.getAudioFile();
+    state.audioSrc = URL.createObjectURL(audio);
+    state.openAudioFile = runtimeData.openAudioFile;
   }
 };
 
@@ -42,15 +49,24 @@ const createLanguageText = async (runtimeData, text) => {
 const openFiles = async () => {
   const files = await Utility.openFiles();
   const textFile = files.text;
-  const text = await textFile.text();
-  languageText = await createLanguageText(runtimeData, text);
-  runtimeData.openNewTextFile(textFile.name);
-  state.sentences = languageText.sentences;
-  state.openTextFile = runtimeData.openTextFile;
+  const audioFile = files.audio;
+  if (textFile) {
+    const text = await textFile.text();
+    runtimeData.openNewTextFile(textFile.name);
+    languageText = await createLanguageText(runtimeData, text);
+    state.sentences = languageText.sentences;
+    state.openTextFile = runtimeData.openTextFile;
+    db.putTextFile(text);
+  }
+  if (audioFile) {
+    runtimeData.openNewAudioFile(audioFile.name);
+    state.openAudioFile = runtimeData.openAudioFile;
+    state.audioSrc = URL.createObjectURL(audioFile);
+    db.putAudioFile(audioFile);
+  }
   console.log("New runtime data", runtimeData);
   console.log("New state", state);
   db.putRuntimeData(runtimeData);
-  db.putTextFile(text);
 };
 
 onMounted(load);
@@ -61,6 +77,8 @@ onMounted(load);
     <MainSidebar
       @open-files="openFiles()"
       :open-text-file="state.openTextFile"
+      :open-audio-file="state.openAudioFile"
+      :audio-src="state.audioSrc"
     />
     <TextReader :sentences="state.sentences" />
   </div>

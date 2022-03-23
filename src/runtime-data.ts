@@ -40,4 +40,8 @@ export class RuntimeData {
     this.openTextFile = filename;
     this.currentPage = 0;
   }
+
+  openNewAudioFile(filename: string) {
+    this.openAudioFile = filename;
+  }
 }

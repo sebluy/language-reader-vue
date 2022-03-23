@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import {onBeforeUpdate} from "vue";
+import AudioPlayer from "@/components/AudioPlayer.vue";
+import { onBeforeUpdate } from "vue";
 
-const props = defineProps(["openTextFile"]);
-onBeforeUpdate(() => console.log("Sidebar will update", props))
+const props = defineProps(["openTextFile", "openAudioFile", "audioSrc"]);
+onBeforeUpdate(() => console.log("Sidebar will update", props));
 </script>
 
 <template>
   <div class="sidebar">
     <div class="sidebar-group">
       <h3>{{ props.openTextFile }}</h3>
-      <h4>Audio File</h4>
-<!--      <AudioPlayer {...this.props.audio}/>-->
+      <h4>{{ props.openAudioFile }}</h4>
+      <AudioPlayer :src="props.audioSrc" />
       <button @click="$emit('openFiles')">Open Files</button>
       <input
           placeholder="Language"
