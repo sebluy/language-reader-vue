@@ -16,6 +16,7 @@ const state = reactive({
   openAudioFile: "",
   audioSrc: "",
   sentences: [],
+  page: 0,
 });
 
 const load = async () => {
@@ -69,17 +70,29 @@ const openFiles = async () => {
   db.putRuntimeData(runtimeData);
 };
 
+const changePageBy = (n) => {
+  let newPage = state.page + n;
+  let valid = languageText.setPage(newPage);
+  if (!valid) return;
+  state.page = newPage;
+  state.sentences = languageText.sentences;
+};
+
 onMounted(load);
 </script>
 
 <template>
   <div>
     <MainSidebar
-      @open-files="openFiles()"
+      @open-files="openFiles"
       :open-text-file="state.openTextFile"
       :open-audio-file="state.openAudioFile"
       :audio-src="state.audioSrc"
     />
-    <TextReader :sentences="state.sentences" />
+    <TextReader
+      :sentences="state.sentences"
+      :page="state.page"
+      @change-page-by="changePageBy"
+    />
   </div>
 </template>

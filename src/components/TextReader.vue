@@ -3,7 +3,7 @@ import MainWindow from "@/components/MainWindow.vue";
 import { computed } from "vue";
 import type { RawSentence } from "@/raw-sentence";
 
-const props = defineProps(["sentences"]);
+const props = defineProps(["sentences", "page"]);
 
 const renderSentences = computed(() => {
   console.log("Reader: ", props.sentences);
@@ -14,7 +14,7 @@ const renderSentences = computed(() => {
 </script>
 
 <template>
-  <MainWindow title="Reader" subtitle="Page 1">
+  <MainWindow title="Reader" :subtitle="'Page ' + (props.page + 1)">
     <template v-slot:activity>
       <p>
         {{ renderSentences }}
@@ -24,8 +24,8 @@ const renderSentences = computed(() => {
       <div class="sidebar right">
         <div class="sidebar-group"></div>
         <div class="sidebar-group">
-          <button>Previous Page</button>
-          <button>Next Page</button>
+          <button @click="$emit('changePageBy', -1)">Previous Page</button>
+          <button @click="$emit('changePageBy', 1)">Next Page</button>
         </div>
         <div class="sidebar-group">
           <button>Toggle Highlighting</button>
