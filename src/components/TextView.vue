@@ -1,25 +1,15 @@
 <script>
-import { reactive, h } from "vue";
+import { h } from "vue";
 import { Utility } from "@/utility";
 
 export default {
-  props: ["sentences"],
-  setup(props) {
-    const state = reactive({
-      selectedWordIndex: undefined,
-      selectedSentenceIndex: undefined,
-    });
-
-    const selectWord = (word, wordIndex, sentence, sentenceIndex) => {
-      // let wordO = props.languageText.words.get(word);
-      // let sentenceO = props.languageText.sentenceMap.get(sentence);
-      state.selectedSentenceIndex = sentenceIndex;
-      state.selectedWordIndex = wordIndex;
-    };
-
+  props: ["languageText", "selectedSentenceIndex", "selectedWordIndex"],
+  emits: ["selectWord"],
+  setup(props, ctx) {
     return () => {
-      if (props.sentences === undefined) return h("p");
-      let sentenceSpans = props.sentences.map((sentence, si) => {
+      console.log("Rendering TextView", props);
+      if (props.languageText === undefined) return h("p");
+      let sentenceSpans = props.languageText.sentences.map((sentence, si) => {
         let wordsAndSpaces = sentence.getWordsAndSpaces();
         let wi = 0;
         let wordSpans = wordsAndSpaces.map((word) => {
@@ -29,13 +19,13 @@ export default {
           let wi2 = wi;
           wi += 1;
           let selected =
-            state.selectedWordIndex === wi2 &&
-            state.selectedSentenceIndex === si;
+            props.selectedWordIndex === wi2 &&
+            props.selectedSentenceIndex === si;
           let spanProps = {
             key: wi2,
             className: selected ? "selected" : "",
             onClick() {
-              selectWord(cWord, wi2, sentence.clean, si);
+              ctx.emit("selectWord", cWord, wi2, sentence.clean, si);
             },
           };
           return h("span", spanProps, word);
