@@ -14,7 +14,9 @@ export class LanguageText {
   text: string | undefined;
   sentences: Array<RawSentence>;
   sentenceMap: Map<string, Sentence>;
-  words: Map<string, Word>;
+  sentenceIndexByWordIndex: Array<number>;
+  words: Array<Word>;
+  wordMap: Map<string, Word>;
   expected: number;
   loaded: number;
 
@@ -30,7 +32,9 @@ export class LanguageText {
     this.pages = this.extractPages(text);
     this.sentences = [];
     this.sentenceMap = new Map();
-    this.words = new Map();
+    this.words = [];
+    this.wordMap = new Map();
+    this.sentenceIndexByWordIndex = [];
     this.expected = 0;
     this.loaded = 0;
     this.setPage(currentPage);
@@ -82,18 +86,24 @@ export class LanguageText {
   }
 
   extractWords() {
-    this.words = new Map();
-    this.sentences.forEach((sentence) => {
+    this.wordMap = new Map();
+    this.words = [];
+    this.sentenceIndexByWordIndex = [];
+    this.sentences.forEach((sentence: RawSentence, sentenceIndex) => {
       const words = sentence.getWords();
       words.forEach((word: string) => {
-        if (this.words.has(word)) {
-          this.words.get(word).count += 1;
+        let wordO = this.wordMap.get(word);
+        if (wordO) {
+          wordO.count += 1;
         } else {
-          this.words.set(word, new Word(word));
+          wordO = new Word(word);
+          this.wordMap.set(word, wordO);
         }
+        this.words.push(wordO);
+        this.sentenceIndexByWordIndex.push(sentenceIndex);
       });
     });
-    this.expected += this.words.size;
+    this.expected += this.wordMap.size;
     this.words.forEach((word) => {
       return this.db.getWord(word.word).then((row: Word) => {
         if (row !== undefined) {

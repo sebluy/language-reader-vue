@@ -2,56 +2,50 @@
 import MainWindow from "@/components/MainWindow.vue";
 import TextView from "@/components/TextView.vue";
 import DefinitionInput from "@/components/DefinitionInput.vue";
-import {onBeforeUpdate, reactive} from "vue";
+import { computed, onBeforeUpdate, reactive } from "vue";
 
 const props = defineProps(["languageText", "page"]);
 const emit = defineEmits(["changePageBy"]);
 const state = reactive({
-  selectedWord: undefined,
   selectedWordIndex: undefined,
-  selectedSentence: undefined,
-  selectedSentenceIndex: undefined,
 });
 
-const selectWord = (word, wordIndex, sentence, sentenceIndex) => {
-  let wordO = props.languageText.words.get(word);
-  let sentenceO = props.languageText.sentenceMap.get(sentence);
-  state.selectedWord = wordO;
+const selectWord = (wordIndex) => {
   state.selectedWordIndex = wordIndex;
-  state.selectedSentence = sentenceO;
-  state.selectedSentenceIndex = sentenceIndex;
 };
 
 const nextSentence = () => {
-  if (state.selectedWordIndex === undefined) return;
-  let sentences = props.languageText.sentences;
-  let index = state.selectedSentenceIndex + 1;
-  if (index >= sentences.length) return;
-  let sentence = sentences[index];
-  let words = sentence.getWords();
-  selectWord(words[0], 0, sentence.clean, index);
+  let text = props.languageText;
+  const sentenceIndex = text.sentenceIndexByWordIndex;
+  const currentSentenceIndex = sentenceIndex[state.selectedWordIndex];
+  for (;;) {
+    if (state.selectedWordIndex === text.words.length - 1) return;
+    state.selectedWordIndex += 1;
+    let nextSentenceIndex = sentenceIndex[state.selectedWordIndex];
+    if (nextSentenceIndex !== currentSentenceIndex) return;
+  }
 };
 
 const nextWord = () => {
   if (state.selectedWordIndex === undefined) return;
-  let sentences = props.languageText.sentences;
-  let wordIndex = state.selectedWordIndex + 1;
-  let selectedSentence = sentences[state.selectedSentenceIndex];
-  let words = selectedSentence.getWords();
-  if (wordIndex >= selectedSentence.getWords().length) {
-    nextSentence();
-    return;
-  }
-  selectWord(
-    words[wordIndex],
-    wordIndex,
-    selectedSentence.clean,
-    state.selectedSentenceIndex
-  );
+  if (state.selectedWordIndex === props.languageText.words.length - 1) return;
+  state.selectedWordIndex += 1;
 };
 
+const selectedWord = computed(() => {
+  if (state.selectedWordIndex === undefined) return undefined;
+  return props.languageText.words[state.selectedWordIndex].word;
+});
+
+const selectedSentence = computed(() => {
+  if (state.selectedWordIndex === undefined) return undefined;
+  const text = props.languageText;
+  const sentenceIndex = text.sentenceIndexByWordIndex[state.selectedWordIndex];
+  return text.sentences[sentenceIndex].clean;
+});
+
 onBeforeUpdate(() => {
-  console.log("Rendering TextReader", props)
+  console.log("Rendering TextReader", props);
 });
 </script>
 
@@ -60,7 +54,6 @@ onBeforeUpdate(() => {
     <template v-slot:activity>
       <TextView
         :language-text="props.languageText"
-        :selected-sentence-index="state.selectedSentenceIndex"
         :selected-word-index="state.selectedWordIndex"
         @select-word="selectWord"
       />
@@ -70,15 +63,15 @@ onBeforeUpdate(() => {
         <div class="sidebar-group">
           <DefinitionInput
             id="word-definition"
-            :key="state.selectedWord && state.selectedWord.word"
-            :text="state.selectedWord && state.selectedWord.word"
-            :focus="state.selectedWord !== undefined"
+            :key="selectedWord"
+            :text="selectedWord"
+            :focus="state.selectedWordIndex !== undefined"
             @next="nextWord"
           />
           <DefinitionInput
             id="sentence-definition"
-            :key="state.selectedSentence && state.selectedSentence.sentence"
-            :text="state.selectedSentence && state.selectedSentence.sentence"
+            :key="selectedSentence"
+            :text="selectedSentence"
             tag="textarea"
             @next="nextSentence"
           />
