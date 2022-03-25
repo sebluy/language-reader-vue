@@ -1,10 +1,11 @@
 <script setup>
 import {computed, onMounted, ref} from "vue";
 
-const props = defineProps(["tag", "text", "focus"]);
-const emit = defineEmits(["next"]);
+const props = defineProps(["tag", "text", "focus", "definition"]);
+const emit = defineEmits(["next", "definitionUpdate"]);
 const cTag = computed(() => (props.tag ? props.tag : "input"));
-const definition = ref(null);
+const definitionInput = ref(null);
+const definition = ref(props.definition);
 
 const next = (e) => {
   if (e.key === "Tab") {
@@ -16,8 +17,9 @@ const next = (e) => {
 };
 
 onMounted(() => {
-  if (props.focus) definition.value.focus();
+  if (props.focus) definitionInput.value.focus();
 });
+
 </script>
 
 <template>
@@ -25,9 +27,12 @@ onMounted(() => {
     <span>{{ props.text }}</span>
     <component
       :is="cTag"
-      ref="definition"
+      ref="definitionInput"
       type="text"
       placeholder="Definition"
+      :value="definition"
+      @input="(event) => (definition = event.target.value)"
+      @blur="emit('definitionUpdate', props.text, definition)"
       @keydown="next"
     />
     <button>Google Translate</button>

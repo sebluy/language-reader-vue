@@ -33,16 +33,22 @@ const nextWord = () => {
 };
 
 const selectedWord = computed(() => {
-  if (state.selectedWordIndex === undefined) return undefined;
-  return props.languageText.words[state.selectedWordIndex].word;
+  if (state.selectedWordIndex === undefined) return {};
+  return props.languageText.words[state.selectedWordIndex];
 });
 
 const selectedSentence = computed(() => {
-  if (state.selectedWordIndex === undefined) return undefined;
+  if (state.selectedWordIndex === undefined) return {};
   const text = props.languageText;
   const sentenceIndex = text.sentenceIndexByWordIndex[state.selectedWordIndex];
-  return text.sentences[sentenceIndex].clean;
+  const clean = text.sentences[sentenceIndex].clean;
+  return text.sentenceMap.get(clean);
 });
+
+const updateWordDefinition = (...args) =>
+  props.languageText.updateWordDefinition(...args);
+const updateSentenceDefinition = (...args) =>
+  props.languageText.updateSentenceDefinition(...args);
 
 onBeforeUpdate(() => {
   console.log("Rendering TextReader", props);
@@ -55,6 +61,7 @@ onBeforeUpdate(() => {
       <TextView
         :language-text="props.languageText"
         :selected-word-index="state.selectedWordIndex"
+        :page="props.page"
         @select-word="selectWord"
       />
     </template>
@@ -63,16 +70,20 @@ onBeforeUpdate(() => {
         <div class="sidebar-group">
           <DefinitionInput
             id="word-definition"
-            :key="selectedWord"
-            :text="selectedWord"
+            :key="selectedWord.word"
+            :text="selectedWord.word"
             :focus="state.selectedWordIndex !== undefined"
+            :definition="selectedWord.definition"
+            @definition-update="updateWordDefinition"
             @next="nextWord"
           />
           <DefinitionInput
-            id="sentence-definition"
-            :key="selectedSentence"
-            :text="selectedSentence"
             tag="textarea"
+            id="sentence-definition"
+            :key="selectedSentence.sentence"
+            :text="selectedSentence.sentence"
+            :definition="selectedSentence.definition"
+            @definition-update="updateSentenceDefinition"
             @next="nextSentence"
           />
         </div>

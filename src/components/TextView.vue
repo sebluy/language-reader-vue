@@ -3,7 +3,7 @@ import { h } from "vue";
 import { Utility } from "@/utility";
 
 export default {
-  props: ["languageText", "selectedWordIndex"],
+  props: ["languageText", "selectedWordIndex", "page"],
   emits: ["selectWord"],
   setup(props, ctx) {
     return () => {

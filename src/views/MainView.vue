@@ -1,7 +1,7 @@
 <script setup>
 import MainSidebar from "@/components/MainSidebar.vue";
 import TextReader from "@/components/TextReader.vue";
-import { onMounted, reactive } from "vue";
+import {onMounted, reactive, shallowRef} from "vue";
 import { LanguageDb } from "@/language-db";
 import { LanguageText } from "@/language-text";
 import { Utility } from "@/utility";
@@ -9,13 +9,12 @@ import { Utility } from "@/utility";
 const db = new LanguageDb();
 
 let runtimeData;
-let languageText;
+let languageText = shallowRef(undefined);
 
 const state = reactive({
   openTextFile: "",
   openAudioFile: "",
   audioSrc: "",
-  languageText: undefined,
   page: 0,
 });
 
@@ -25,8 +24,7 @@ const load = async () => {
   console.log(runtimeData);
   if (runtimeData.openTextFile) {
     const text = await db.getTextFile();
-    languageText = await createLanguageText(runtimeData, text);
-    state.languageText = languageText;
+    languageText.value = await createLanguageText(runtimeData, text);
     state.openTextFile = runtimeData.openTextFile;
   }
   if (runtimeData.openAudioFile) {
@@ -54,8 +52,7 @@ const openFiles = async () => {
   if (textFile) {
     const text = await textFile.text();
     runtimeData.openNewTextFile(textFile.name);
-    languageText = await createLanguageText(runtimeData, text);
-    state.languageText = languageText;
+    languageText.value = await createLanguageText(runtimeData, text);
     state.openTextFile = runtimeData.openTextFile;
     db.putTextFile(text);
   }
@@ -72,7 +69,7 @@ const openFiles = async () => {
 
 const changePageBy = (n) => {
   let newPage = state.page + n;
-  let valid = languageText.setPage(newPage);
+  let valid = languageText.value.setPage(newPage);
   if (!valid) return;
   state.page = newPage;
 };
@@ -89,7 +86,7 @@ onMounted(load);
       :audio-src="state.audioSrc"
     />
     <TextReader
-      :language-text="state.languageText"
+      :language-text="languageText"
       :page="state.page"
       @change-page-by="changePageBy"
     />
