@@ -3,49 +3,20 @@ import MainWindow from "@/components/MainWindow.vue";
 import TextView from "@/components/TextView.vue";
 import DefinitionInput from "@/components/DefinitionInput.vue";
 import { computed, onBeforeUpdate, reactive } from "vue";
+import WordCursor from "@/WordCursor";
 
 const props = defineProps(["languageText", "page", "language"]);
 const emit = defineEmits(["changePageBy"]);
 const state = reactive({
-  selectedWordIndex: undefined,
+  selectedWordCursor: new WordCursor(() => props.languageText),
   highlighting: false,
   page: props.page,
 });
 
-const selectWord = (wordIndex) => {
-  state.selectedWordIndex = wordIndex;
-};
-
-const nextSentence = () => {
-  let text = props.languageText;
-  const sentenceIndex = text.sentenceIndexByWordIndex;
-  const currentSentenceIndex = sentenceIndex[state.selectedWordIndex];
-  for (;;) {
-    if (state.selectedWordIndex === text.words.length - 1) return;
-    state.selectedWordIndex += 1;
-    let nextSentenceIndex = sentenceIndex[state.selectedWordIndex];
-    if (nextSentenceIndex !== currentSentenceIndex) return;
-  }
-};
-
-const nextWord = () => {
-  if (state.selectedWordIndex === undefined) return;
-  if (state.selectedWordIndex === props.languageText.words.length - 1) return;
-  state.selectedWordIndex += 1;
-};
-
-const selectedWord = computed(() => {
-  if (state.selectedWordIndex === undefined) return {};
-  return props.languageText.words[state.selectedWordIndex];
-});
-
-const selectedSentence = computed(() => {
-  if (state.selectedWordIndex === undefined) return {};
-  const text = props.languageText;
-  const sentenceIndex = text.sentenceIndexByWordIndex[state.selectedWordIndex];
-  const clean = text.sentences[sentenceIndex].clean;
-  return text.sentenceMap.get(clean);
-});
+const selectedWord = computed(() => state.selectedWordCursor.selectedWord());
+const selectedSentence = computed(() =>
+  state.selectedWordCursor.selectedSentence()
+);
 
 const updateWordDefinition = (...args) =>
   props.languageText.updateWordDefinition(...args);
@@ -53,7 +24,7 @@ const updateSentenceDefinition = (...args) =>
   props.languageText.updateSentenceDefinition(...args);
 
 onBeforeUpdate(() => {
-  if (props.page !== state.page) state.selectedWordIndex = undefined;
+  if (props.page !== state.page) state.selectedWordCursor.setIndex(undefined);
   console.log("Rendering TextReader", props);
 });
 </script>
@@ -63,10 +34,10 @@ onBeforeUpdate(() => {
     <template v-slot:activity>
       <TextView
         :language-text="props.languageText"
-        :selected-word-index="state.selectedWordIndex"
+        :selected-word-index="state.selectedWordCursor.getIndex()"
         :page="props.page"
         :highlighting="state.highlighting"
-        @select-word="selectWord"
+        @select-word="(i) => state.selectedWordCursor.setIndex(i)"
       />
     </template>
     <template v-slot:sidebar>
@@ -76,11 +47,11 @@ onBeforeUpdate(() => {
             id="word-definition"
             :key="selectedWord.word"
             :text="selectedWord.word"
-            :focus="state.selectedWordIndex !== undefined"
+            :focus="state.selectedWordCursor.getIndex() !== undefined"
             :definition="selectedWord.definition"
             :language="props.language"
             @definition-update="updateWordDefinition"
-            @next="nextWord"
+            @next="state.selectedWordCursor.nextWord()"
           />
           <DefinitionInput
             tag="textarea"
@@ -90,7 +61,7 @@ onBeforeUpdate(() => {
             :definition="selectedSentence.definition"
             :language="props.language"
             @definition-update="updateSentenceDefinition"
-            @next="nextSentence"
+            @next="state.selectedWordCursor.nextSentence()"
           />
         </div>
         <div class="sidebar-group">

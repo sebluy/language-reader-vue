@@ -1,7 +1,7 @@
 <script setup>
 import MainSidebar from "@/components/MainSidebar.vue";
 import TextReader from "@/components/TextReader.vue";
-import {onMounted, reactive, shallowRef} from "vue";
+import { onMounted, reactive, shallowRef } from "vue";
 import { LanguageDb } from "@/language-db";
 import { LanguageText } from "@/language-text";
 import { Utility } from "@/utility";
