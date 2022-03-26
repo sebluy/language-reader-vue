@@ -4,7 +4,7 @@ import TextView from "@/components/TextView.vue";
 import DefinitionInput from "@/components/DefinitionInput.vue";
 import { computed, onBeforeUpdate, reactive } from "vue";
 
-const props = defineProps(["languageText", "page"]);
+const props = defineProps(["languageText", "page", "language"]);
 const emit = defineEmits(["changePageBy"]);
 const state = reactive({
   selectedWordIndex: undefined,
@@ -74,6 +74,7 @@ onBeforeUpdate(() => {
             :text="selectedWord.word"
             :focus="state.selectedWordIndex !== undefined"
             :definition="selectedWord.definition"
+            :language="props.language"
             @definition-update="updateWordDefinition"
             @next="nextWord"
           />
@@ -83,6 +84,7 @@ onBeforeUpdate(() => {
             :key="selectedSentence.sentence"
             :text="selectedSentence.sentence"
             :definition="selectedSentence.definition"
+            :language="props.language"
             @definition-update="updateSentenceDefinition"
             @next="nextSentence"
           />

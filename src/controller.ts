@@ -3,6 +3,8 @@ import { LanguageDb } from "@/language-db";
 import { RuntimeData } from "@/runtime-data";
 import {Utility} from "@/utility";
 
+// TODO: Using inject for runtimeData and languageText
+
 // TODO: Re-write using Vue
 // TODO: Add table to show progress over time (total words translated, XP, mastery)
 // TODO: Adjust mastery manually

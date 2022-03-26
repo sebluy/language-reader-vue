@@ -1,7 +1,7 @@
 <script setup>
-import {computed, onMounted, ref} from "vue";
+import { computed, onMounted, ref } from "vue";
 
-const props = defineProps(["tag", "text", "focus", "definition"]);
+const props = defineProps(["tag", "text", "focus", "definition", "language"]);
 const emit = defineEmits(["next", "definitionUpdate"]);
 const cTag = computed(() => (props.tag ? props.tag : "input"));
 const definitionInput = ref(null);
@@ -16,10 +16,24 @@ const next = (e) => {
   e.stopPropagation();
 };
 
+const googleTranslate = () => {
+  const text = props.text;
+  const url =
+    "https://translate.googleapis.com/translate_a/single?client=gtx&sl=" +
+    props.language +
+    "&tl=en&dt=t&q=" +
+    encodeURI(text);
+  fetch(url)
+    .then((res) => res.json())
+    .then((res) => {
+      definition.value = res[0].map(([v]) => v).join("");
+      definitionInput.value.focus();
+    });
+};
+
 onMounted(() => {
   if (props.focus) definitionInput.value.focus();
 });
-
 </script>
 
 <template>
@@ -35,6 +49,6 @@ onMounted(() => {
       @blur="emit('definitionUpdate', props.text, definition)"
       @keydown="next"
     />
-    <button>Google Translate</button>
+    <button @click="googleTranslate">Google Translate</button>
   </div>
 </template>

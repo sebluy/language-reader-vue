@@ -86,6 +86,7 @@ onMounted(load);
       :audio-src="state.audioSrc"
     />
     <TextReader
+      language="es"
       :language-text="languageText"
       :page="state.page"
       @change-page-by="changePageBy"
