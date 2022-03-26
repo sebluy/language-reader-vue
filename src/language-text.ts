@@ -17,8 +17,7 @@ export class LanguageText {
   sentenceIndexByWordIndex: Array<number>;
   words: Array<Word>;
   wordMap: Map<string, Word>;
-  expected: number;
-  loaded: number;
+  promises: Promise<void>[];
 
   constructor(
     db: LanguageDb,
@@ -35,13 +34,12 @@ export class LanguageText {
     this.words = [];
     this.wordMap = new Map();
     this.sentenceIndexByWordIndex = [];
-    this.expected = 0;
-    this.loaded = 0;
+    this.promises = [];
     this.setPage(currentPage);
   }
 
-  async onLoad() {
-    return;
+  onLoad(): Promise<void[]> {
+    return Promise.all(this.promises);
   }
 
   onUpdateDefinition(word: string) {
@@ -51,8 +49,7 @@ export class LanguageText {
   setPage(n: number): boolean {
     if (n < 0 || n >= this.pages.length) return false;
     this.text = this.pages[n];
-    this.expected = 0;
-    this.loaded = 0;
+    this.promises = [];
     this.extractSentences();
     this.extractWords();
     return true;
@@ -103,21 +100,19 @@ export class LanguageText {
         this.sentenceIndexByWordIndex.push(sentenceIndex);
       });
     });
-    this.expected += this.wordMap.size;
     this.words.forEach((word) => {
-      return this.db.getWord(word.word).then((row: Word) => {
+      const promise = this.db.getWord(word.word).then((row: Word) => {
         if (row !== undefined) {
           word.definition = row.definition;
           word.mastery = row.mastery;
         }
-        this.markLoaded();
       });
+      this.promises.push(promise);
     });
-    this.expected += 1;
-    this.db.getNumberOfWords().then((n: number) => {
+    const promise = this.db.getNumberOfWords().then((n: number) => {
       this.totalWordsTranslated = n;
-      this.markLoaded();
     });
+    this.promises.push(promise);
   }
 
   updateWordDefinition(word: string, definition: string) {
@@ -187,24 +182,19 @@ export class LanguageText {
       if (endPos === false) break;
       i = endPos + 1;
     }
-    this.expected += this.sentenceMap.size;
-    if (this.expected === 0) this.onLoad();
     this.sentenceMap.forEach((sentence) => {
-      this.db.getSentence(sentence.sentence).then((row: Sentence) => {
-        if (row !== undefined) {
-          if (row.definition !== undefined)
-            sentence.definition = row.definition;
-          sentence.startTime = row.startTime;
-          sentence.endTime = row.endTime;
-        }
-        this.markLoaded();
-      });
+      const promise = this.db
+        .getSentence(sentence.sentence)
+        .then((row: Sentence) => {
+          if (row !== undefined) {
+            if (row.definition !== undefined)
+              sentence.definition = row.definition;
+            sentence.startTime = row.startTime;
+            sentence.endTime = row.endTime;
+          }
+        });
+      this.promises.push(promise);
     });
-  }
-
-  markLoaded() {
-    this.loaded += 1;
-    if (this.loaded === this.expected) this.onLoad();
   }
 
   // getRandomSentenceBlock(n)

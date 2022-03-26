@@ -67,10 +67,11 @@ const openFiles = async () => {
   db.putRuntimeData(runtimeData);
 };
 
-const changePageBy = (n) => {
+const changePageBy = async (n) => {
   let newPage = state.page + n;
   let valid = languageText.value.setPage(newPage);
   if (!valid) return;
+  await languageText.value.onLoad();
   state.page = newPage;
 };
 

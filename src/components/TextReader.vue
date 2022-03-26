@@ -8,6 +8,8 @@ const props = defineProps(["languageText", "page", "language"]);
 const emit = defineEmits(["changePageBy"]);
 const state = reactive({
   selectedWordIndex: undefined,
+  highlighting: false,
+  page: props.page,
 });
 
 const selectWord = (wordIndex) => {
@@ -51,6 +53,7 @@ const updateSentenceDefinition = (...args) =>
   props.languageText.updateSentenceDefinition(...args);
 
 onBeforeUpdate(() => {
+  if (props.page !== state.page) state.selectedWordIndex = undefined;
   console.log("Rendering TextReader", props);
 });
 </script>
@@ -62,6 +65,7 @@ onBeforeUpdate(() => {
         :language-text="props.languageText"
         :selected-word-index="state.selectedWordIndex"
         :page="props.page"
+        :highlighting="state.highlighting"
         @select-word="selectWord"
       />
     </template>
@@ -94,7 +98,9 @@ onBeforeUpdate(() => {
           <button @click="emit('changePageBy', 1)">Next Page</button>
         </div>
         <div class="sidebar-group">
-          <button>Toggle Highlighting</button>
+          <button @click="state.highlighting = !state.highlighting">
+            Toggle Highlighting
+          </button>
         </div>
       </div>
     </template>
