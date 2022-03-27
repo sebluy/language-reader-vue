@@ -85,12 +85,12 @@ onMounted(load);
       :open-text-file="state.openTextFile"
       :open-audio-file="state.openAudioFile"
       :audio-src="state.audioSrc"
+      @change-page-by="changePageBy"
     />
     <TextReader
       language="es"
       :language-text="languageText"
       :page="state.page"
-      @change-page-by="changePageBy"
     />
   </div>
 </template>

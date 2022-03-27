@@ -3,6 +3,7 @@ import AudioPlayer from "@/components/AudioPlayer.vue";
 import { onBeforeUpdate } from "vue";
 
 const props = defineProps(["openTextFile", "openAudioFile", "audioSrc"]);
+const emit = defineEmits(["changePageBy"]);
 onBeforeUpdate(() => console.log("Sidebar will update", props));
 </script>
 
@@ -29,6 +30,10 @@ onBeforeUpdate(() => console.log("Sidebar will update", props));
         <option value="cloze">Cloze</option>
         <option value="unscramble">Unscramble</option>
       </select>
+    </div>
+    <div class="sidebar-group">
+      <button @click="emit('changePageBy', -1)">Previous Page</button>
+      <button @click="emit('changePageBy', 1)">Next Page</button>
     </div>
 <!--    <Statistics {...this.props.statistics}/>-->
     <div class="sidebar-group">
