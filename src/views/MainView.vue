@@ -29,6 +29,7 @@ const load = async () => {
     let audio = await db.getAudioFile();
     state.audioSrc = URL.createObjectURL(audio);
   }
+  updateStats();
 };
 
 const createLanguageText = async (text) => {
@@ -36,10 +37,17 @@ const createLanguageText = async (text) => {
     db,
     state.runtimeData.openTextFile,
     text,
-    state.runtimeData.currentPage
+    state.runtimeData.currentPage,
+    learnNewWord
   );
   await languageText.onLoad();
   return languageText;
+};
+
+const learnNewWord = () => {
+  state.runtimeData.wordsLearnedToday += 1;
+  state.runtimeData.xpToday += 1;
+  db.putRuntimeData(runtimeData);
 };
 
 const openFiles = async () => {
@@ -57,6 +65,7 @@ const openFiles = async () => {
     state.audioSrc = URL.createObjectURL(audioFile);
     db.putAudioFile(audioFile);
   }
+  updateStats();
   console.log("New state", state);
   db.putRuntimeData(runtimeData);
 };
@@ -87,17 +96,27 @@ const exportDatabase = async () => {
   Utility.download("language-db.json", JSON.stringify(object));
 };
 
+const updateStats = () => {
+  let statistics = languageText.value.updateStats();
+  statistics.wordsLearnedToday = state.runtimeData.wordsLearnedToday;
+  statistics.xpToday = state.runtimeData.xpToday;
+  statistics.xpLast = state.runtimeData.xpLast;
+  state.statistics = statistics;
+};
+
 onMounted(load);
 </script>
 
 <template>
   <div>
     <MainSidebar
-      @open-files="openFiles"
       :runtime-data="state.runtimeData"
       :audio-src="state.audioSrc"
+      :statistics="state.statistics"
+      @open-files="openFiles"
       @change-page-by="changePageBy"
       @update-language="updateLanguage"
+      @update-stats="updateStats"
       @import-database="importDatabase"
       @export-database="exportDatabase"
     />

@@ -26,10 +26,11 @@ export default {
           if (cWord === "") return word;
           let wi2 = wi;
           wi += 1;
+          let selected = props.selectedWordIndex === wi2;
           let spanProps = {
             key: wi2,
-            style: wordHighlighting(cWord),
-            className: props.selectedWordIndex === wi2 ? "selected" : "",
+            style: selected ? "" : wordHighlighting(cWord),
+            className: selected ? "selected" : "",
             onClick() {
               ctx.emit("selectWord", wi2);
             },

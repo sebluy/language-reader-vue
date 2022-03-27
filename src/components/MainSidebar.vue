@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import AudioPlayer from "@/components/AudioPlayer.vue";
+import StatisticsTable from "@/components/StatisticsTable.vue";
 import { onBeforeUpdate } from "vue";
 
-const props = defineProps(["runtimeData", "audioSrc"]);
+const props = defineProps(["runtimeData", "audioSrc", "statistics"]);
 const emit = defineEmits([
   "changePageBy",
   "updateLanguage",
   "importDatabase",
   "exportDatabase",
+  "updateStats",
 ]);
 onBeforeUpdate(() => console.log("Sidebar will update", props));
 </script>
@@ -42,7 +44,11 @@ onBeforeUpdate(() => console.log("Sidebar will update", props));
       <button @click="emit('changePageBy', -1)">Previous Page</button>
       <button @click="emit('changePageBy', 1)">Next Page</button>
     </div>
-    <!--    <Statistics {...this.props.statistics}/>-->
+    <StatisticsTable
+      v-if="props.statistics"
+      :statistics="props.statistics"
+      @update-stats="emit('updateStats')"
+    />
     <div class="sidebar-group">
       <button @click="emit('exportDatabase')">Export Database</button>
       <button @click="emit('importDatabase')">Import Database</button>

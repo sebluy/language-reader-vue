@@ -18,17 +18,20 @@ export class LanguageText {
   words: Array<Word>;
   wordMap: Map<string, Word>;
   promises: Promise<void>[];
+  onNewWordLearned: () => void;
 
   constructor(
     db: LanguageDb,
     filename: string,
     text: string,
-    currentPage: number
+    currentPage: number,
+    onNewWordLearned: () => void
   ) {
     this.db = db;
     this.filename = filename;
     this.totalWordsTranslated = 0;
     this.pages = this.extractPages(text);
+    this.onNewWordLearned = onNewWordLearned;
     this.sentences = [];
     this.sentenceMap = new Map();
     this.words = [];
@@ -121,6 +124,7 @@ export class LanguageText {
     if (wordData.definition === definition) return;
     if (wordData.definition === "") {
       this.totalWordsTranslated += 1;
+      this.onNewWordLearned();
     }
     wordData.definition = definition;
     console.log("Updating definition... for " + word + " to " + definition);
@@ -147,7 +151,7 @@ export class LanguageText {
     let wMastered = 0;
     let numberOfWords = 0;
     let newWords = 0;
-    this.words.forEach((data) => {
+    this.wordMap.forEach((data) => {
       wMastered += data.mastery;
       numberOfWords += data.count;
       countTranslated += data.getTranslatedCount();
@@ -155,7 +159,7 @@ export class LanguageText {
     });
     const percentTranslated =
       countTranslated === 0 ? 0 : countTranslated / numberOfWords;
-    const percentWMastered = wMastered / (this.words.size * 5);
+    const percentWMastered = wMastered / (this.wordMap.size * 5);
     return {
       newWords: newWords,
       totalWordsTranslated: this.totalWordsTranslated,
