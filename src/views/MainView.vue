@@ -5,44 +5,38 @@ import { onMounted, reactive, shallowRef } from "vue";
 import { LanguageDb } from "@/language-db";
 import { LanguageText } from "@/language-text";
 import { Utility } from "@/utility";
+import { RuntimeData } from "@/runtime-data";
 
 const db = new LanguageDb();
-
-let runtimeData;
-let languageText = shallowRef(undefined);
+const languageText = shallowRef(undefined);
+let runtimeData = new RuntimeData();
 
 const state = reactive({
-  openTextFile: "",
-  openAudioFile: "",
+  runtimeData: runtimeData,
   audioSrc: "",
-  page: undefined,
-  language: "",
 });
 
 const load = async () => {
   runtimeData = await db.getRuntimeData();
-  runtimeData.updateForNewDay();
-  state.language = runtimeData.language;
-  console.log(runtimeData);
-  if (runtimeData.openTextFile) {
+  state.runtimeData = runtimeData;
+  state.runtimeData.updateForNewDay();
+  console.log(state.runtimeData);
+  if (state.runtimeData.openTextFile) {
     const text = await db.getTextFile();
-    languageText.value = await createLanguageText(runtimeData, text);
-    state.page = runtimeData.currentPage;
-    state.openTextFile = runtimeData.openTextFile;
+    languageText.value = await createLanguageText(text);
   }
-  if (runtimeData.openAudioFile) {
+  if (state.runtimeData.openAudioFile) {
     let audio = await db.getAudioFile();
     state.audioSrc = URL.createObjectURL(audio);
-    state.openAudioFile = runtimeData.openAudioFile;
   }
 };
 
-const createLanguageText = async (runtimeData, text) => {
+const createLanguageText = async (text) => {
   let languageText = new LanguageText(
     db,
-    runtimeData.openTextFile,
+    state.runtimeData.openTextFile,
     text,
-    runtimeData.currentPage
+    state.runtimeData.currentPage
   );
   await languageText.onLoad();
   return languageText;
@@ -54,36 +48,30 @@ const openFiles = async () => {
   const audioFile = files.audio;
   if (textFile) {
     const text = await textFile.text();
-    runtimeData.openNewTextFile(textFile.name);
-    languageText.value = await createLanguageText(runtimeData, text);
-    state.openTextFile = runtimeData.openTextFile;
-    state.page = runtimeData.currentPage;
+    state.runtimeData.openNewTextFile(textFile.name);
+    languageText.value = await createLanguageText(text);
     db.putTextFile(text);
   }
   if (audioFile) {
-    runtimeData.openNewAudioFile(audioFile.name);
-    state.openAudioFile = runtimeData.openAudioFile;
+    state.runtimeData.openNewAudioFile(audioFile.name);
     state.audioSrc = URL.createObjectURL(audioFile);
     db.putAudioFile(audioFile);
   }
-  console.log("New runtime data", runtimeData);
   console.log("New state", state);
   db.putRuntimeData(runtimeData);
 };
 
 const changePageBy = async (n) => {
-  let newPage = state.page + n;
+  let newPage = state.runtimeData.currentPage + n;
   let valid = languageText.value.setPage(newPage);
   if (!valid) return;
-  runtimeData.currentPage = newPage;
-  db.putRuntimeData(runtimeData);
   await languageText.value.onLoad();
-  state.page = newPage;
+  state.runtimeData.currentPage = newPage;
+  db.putRuntimeData(runtimeData);
 };
 
 const updateLanguage = (language) => {
-  state.language = language;
-  runtimeData.language = language;
+  state.runtimeData.language = language;
   db.putRuntimeData(runtimeData);
 };
 
@@ -94,18 +82,15 @@ onMounted(load);
   <div>
     <MainSidebar
       @open-files="openFiles"
-      :open-text-file="state.openTextFile"
-      :open-audio-file="state.openAudioFile"
+      :runtime-data="state.runtimeData"
       :audio-src="state.audioSrc"
-      :language="state.language"
       @change-page-by="changePageBy"
       @update-language="updateLanguage"
     />
     <TextReader
       v-if="languageText"
-      :language="state.language"
+      :runtime-data="state.runtimeData"
       :language-text="languageText"
-      :page="state.page"
     />
   </div>
 </template>

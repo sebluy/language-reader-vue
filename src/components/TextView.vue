@@ -4,7 +4,7 @@ import { Utility } from "@/utility";
 import { Word } from "@/word";
 
 export default {
-  props: ["languageText", "selectedWordIndex", "page", "highlighting"],
+  props: ["languageText", "selectedWordIndex", "highlighting"],
   emits: ["selectWord"],
   setup(props, ctx) {
     const wordHighlighting = (word) => {

@@ -69,6 +69,7 @@ export class LanguageDb {
   }
 
   putRuntimeData(runtimeData: RuntimeData) {
+    console.log("Saving runtime data", runtimeData);
     this.db.other.put({ key: "runtimeData", value: runtimeData });
   }
 

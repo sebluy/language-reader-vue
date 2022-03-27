@@ -5,11 +5,11 @@ import DefinitionInput from "@/components/DefinitionInput.vue";
 import { computed, onBeforeUpdate, reactive } from "vue";
 import WordCursor from "@/WordCursor";
 
-const props = defineProps(["languageText", "page", "language"]);
+const props = defineProps(["languageText", "runtimeData"]);
 const state = reactive({
   selectedWordCursor: new WordCursor(() => props.languageText),
   highlighting: false,
-  page: props.page,
+  page: props.runtimeData.currentPage,
 });
 
 const selectedWord = computed(() => state.selectedWordCursor.selectedWord());
@@ -23,18 +23,24 @@ const updateSentenceDefinition = (...args) =>
   props.languageText.updateSentenceDefinition(...args);
 
 onBeforeUpdate(() => {
-  if (props.page !== state.page) state.selectedWordCursor.setIndex(undefined);
+  if (props.runtimeData.currentPage !== state.page) {
+    state.selectedWordCursor.setIndex(undefined);
+    state.page = props.runtimeData.currentPage;
+  }
   console.log("Rendering TextReader", props);
 });
 </script>
 
 <template>
-  <MainWindow title="Reader" :subtitle="'Page ' + (props.page + 1)">
+  <MainWindow
+    title="Reader"
+    :subtitle="'Page ' + (props.runtimeData.currentPage + 1)"
+  >
     <template v-slot:activity>
       <TextView
         :language-text="props.languageText"
+        :key="props.runtimeData.currentPage"
         :selected-word-index="state.selectedWordCursor.getIndex()"
-        :page="props.page"
         :highlighting="state.highlighting"
         @select-word="(i) => state.selectedWordCursor.setIndex(i)"
       />
@@ -48,7 +54,7 @@ onBeforeUpdate(() => {
             :text="selectedWord.word"
             :focus="state.selectedWordCursor.getIndex() !== undefined"
             :definition="selectedWord.definition"
-            :language="props.language"
+            :language="props.runtimeData.language"
             @definition-update="updateWordDefinition"
             @next="state.selectedWordCursor.nextWord()"
           />
@@ -58,7 +64,7 @@ onBeforeUpdate(() => {
             :key="selectedSentence.sentence"
             :text="selectedSentence.sentence"
             :definition="selectedSentence.definition"
-            :language="props.language"
+            :language="props.runtimeData.language"
             @definition-update="updateSentenceDefinition"
             @next="state.selectedWordCursor.nextSentence()"
           />
