@@ -2,8 +2,8 @@
 import AudioPlayer from "@/components/AudioPlayer.vue";
 import { onBeforeUpdate } from "vue";
 
-const props = defineProps(["openTextFile", "openAudioFile", "audioSrc"]);
-const emit = defineEmits(["changePageBy"]);
+const props = defineProps(["openTextFile", "openAudioFile", "audioSrc", "language"]);
+const emit = defineEmits(["changePageBy", "updateLanguage"]);
 onBeforeUpdate(() => console.log("Sidebar will update", props));
 </script>
 
@@ -15,9 +15,11 @@ onBeforeUpdate(() => console.log("Sidebar will update", props));
       <AudioPlayer :src="props.audioSrc" />
       <button @click="$emit('openFiles')">Open Files</button>
       <input
-          placeholder="Language"
-          type="text"
-          readOnly/>
+        :value="props.language"
+        @change="(e) => emit('updateLanguage', e.target.value)"
+        placeholder="Language"
+        type="text"
+      />
     </div>
     <div class="sidebar-group">
       <select name="activity">
@@ -35,11 +37,10 @@ onBeforeUpdate(() => console.log("Sidebar will update", props));
       <button @click="emit('changePageBy', -1)">Previous Page</button>
       <button @click="emit('changePageBy', 1)">Next Page</button>
     </div>
-<!--    <Statistics {...this.props.statistics}/>-->
+    <!--    <Statistics {...this.props.statistics}/>-->
     <div class="sidebar-group">
       <button>Export Database</button>
       <button>Import Database</button>
     </div>
   </div>
 </template>
-

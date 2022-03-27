@@ -15,16 +15,19 @@ const state = reactive({
   openTextFile: "",
   openAudioFile: "",
   audioSrc: "",
-  page: 0,
+  page: undefined,
+  language: "",
 });
 
 const load = async () => {
   runtimeData = await db.getRuntimeData();
   runtimeData.updateForNewDay();
+  state.language = runtimeData.language;
   console.log(runtimeData);
   if (runtimeData.openTextFile) {
     const text = await db.getTextFile();
     languageText.value = await createLanguageText(runtimeData, text);
+    state.page = runtimeData.currentPage;
     state.openTextFile = runtimeData.openTextFile;
   }
   if (runtimeData.openAudioFile) {
@@ -54,6 +57,7 @@ const openFiles = async () => {
     runtimeData.openNewTextFile(textFile.name);
     languageText.value = await createLanguageText(runtimeData, text);
     state.openTextFile = runtimeData.openTextFile;
+    state.page = runtimeData.currentPage;
     db.putTextFile(text);
   }
   if (audioFile) {
@@ -71,8 +75,16 @@ const changePageBy = async (n) => {
   let newPage = state.page + n;
   let valid = languageText.value.setPage(newPage);
   if (!valid) return;
+  runtimeData.currentPage = newPage;
+  db.putRuntimeData(runtimeData);
   await languageText.value.onLoad();
   state.page = newPage;
+};
+
+const updateLanguage = (language) => {
+  state.language = language;
+  runtimeData.language = language;
+  db.putRuntimeData(runtimeData);
 };
 
 onMounted(load);
@@ -85,10 +97,13 @@ onMounted(load);
       :open-text-file="state.openTextFile"
       :open-audio-file="state.openAudioFile"
       :audio-src="state.audioSrc"
+      :language="state.language"
       @change-page-by="changePageBy"
+      @update-language="updateLanguage"
     />
     <TextReader
-      language="es"
+      v-if="languageText"
+      :language="state.language"
       :language-text="languageText"
       :page="state.page"
     />
