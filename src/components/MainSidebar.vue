@@ -3,7 +3,12 @@ import AudioPlayer from "@/components/AudioPlayer.vue";
 import { onBeforeUpdate } from "vue";
 
 const props = defineProps(["runtimeData", "audioSrc"]);
-const emit = defineEmits(["changePageBy", "updateLanguage"]);
+const emit = defineEmits([
+  "changePageBy",
+  "updateLanguage",
+  "importDatabase",
+  "exportDatabase",
+]);
 onBeforeUpdate(() => console.log("Sidebar will update", props));
 </script>
 
@@ -39,8 +44,8 @@ onBeforeUpdate(() => console.log("Sidebar will update", props));
     </div>
     <!--    <Statistics {...this.props.statistics}/>-->
     <div class="sidebar-group">
-      <button>Export Database</button>
-      <button>Import Database</button>
+      <button @click="emit('exportDatabase')">Export Database</button>
+      <button @click="emit('importDatabase')">Import Database</button>
     </div>
   </div>
 </template>

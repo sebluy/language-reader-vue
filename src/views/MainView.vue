@@ -75,6 +75,18 @@ const updateLanguage = (language) => {
   db.putRuntimeData(runtimeData);
 };
 
+const importDatabase = async () => {
+  const file = await Utility.uploadText();
+  const text = await file.text();
+  await db.import(JSON.parse(text));
+  await load();
+};
+
+const exportDatabase = async () => {
+  let object = await db.export();
+  Utility.download("language-db.json", JSON.stringify(object));
+};
+
 onMounted(load);
 </script>
 
@@ -86,6 +98,8 @@ onMounted(load);
       :audio-src="state.audioSrc"
       @change-page-by="changePageBy"
       @update-language="updateLanguage"
+      @import-database="importDatabase"
+      @export-database="exportDatabase"
     />
     <TextReader
       v-if="languageText"

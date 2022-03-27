@@ -1,8 +1,3 @@
-import { LanguageText } from "@/language-text";
-import { LanguageDb } from "@/language-db";
-import { RuntimeData } from "@/runtime-data";
-import {Utility} from "@/utility";
-
 // TODO: Using inject for runtimeData and languageText
 
 // TODO: Re-write using Vue
@@ -74,70 +69,5 @@ import {Utility} from "@/utility";
 // TODO: use an actual dictionary instead of google translate
 // TODO: make it mobile friendly
 // TODO: find a way to sync with multiple clients
-export class Controller {
-  db: LanguageDb;
-  runtimeData: RuntimeData;
-  languageText: LanguageText;
-  midnightTimeout: unknown;
 
-  constructor() {
-    this.db = new LanguageDb();
-    this.runtimeData = new RuntimeData();
-    this.languageText = new LanguageText(this.db, "", "", 0);
-  }
-
-  async load() {
-    let runtimeData = await this.db.getRuntimeData();
-    if (runtimeData === undefined) runtimeData = new RuntimeData();
-    console.log(runtimeData);
-    runtimeData.updateForNewDay();
-    this.runtimeData = runtimeData;
-    // this.sidebar.setNames()
-    // this.sidebar.setLanguage(runtimeData.language)
-    // TODO: how to handle async text load
-    if (runtimeData.openTextFile) {
-      const text = await this.db.getTextFile();
-      await this.loadTextFile(text);
-    }
-    let audioSrc;
-    if (runtimeData.openAudioFile) {
-      const audio = await this.db.getAudioFile();
-      audioSrc = URL.createObjectURL(audio);
-    }
-    return {
-      runtimeData: runtimeData,
-      languageText: this.languageText,
-      audio: { src: audioSrc },
-    };
-  }
-
-  loadTextFile(text: string): Promise<LanguageText> {
-    this.languageText = new LanguageText(
-      this.db,
-      this.runtimeData.openTextFile || "",
-      text,
-      this.runtimeData.currentPage
-    );
-    return new Promise((resolve) => {
-      this.languageText.onLoad = () => {
-        resolve(this.languageText);
-      };
-    });
-  }
-
-  openTextFile(file: File) {
-    return file.text().then((text: string) => {
-      this.runtimeData.openTextFile = file.name;
-      this.runtimeData.currentPage = 0;
-      this.db.putRuntimeData(this.runtimeData);
-      this.db.putTextFile(text);
-      return this.loadTextFile(text);
-    });
-  }
-
-  openAudioFile(file: File) {
-    this.runtimeData.openAudioFile = file.name;
-    this.db.putRuntimeData(this.runtimeData);
-    this.db.putAudioFile(file);
-  }
-}
+export class Controller {}
