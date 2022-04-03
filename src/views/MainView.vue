@@ -45,7 +45,7 @@ const createLanguageText = async (text) => {
     state.runtimeData.currentPage,
     learnNewWord
   );
-  await languageText.onLoad();
+  await languageText.load();
   return languageText;
 };
 
@@ -79,7 +79,7 @@ const changePageBy = async (n) => {
   let newPage = state.runtimeData.currentPage + n;
   let valid = languageText.value.setPage(newPage);
   if (!valid) return;
-  await languageText.value.onLoad();
+  await languageText.value.load();
   state.runtimeData.currentPage = newPage;
   db.putRuntimeData(runtimeData);
 };

@@ -6,6 +6,8 @@ import type { LanguageDb } from "@/language-db";
 
 // TODO: extract TextPage class
 
+// TODO: Fix this promise garbage use async, linear
+
 export class LanguageText {
   filename: string;
   totalWordsTranslated: number;
@@ -17,7 +19,7 @@ export class LanguageText {
   sentenceIndexByWordIndex: Array<number>;
   words: Array<Word>;
   wordMap: Map<string, Word>;
-  promises: Promise<void>[];
+  promise: Promise<void>;
   onNewWordLearned: () => void;
 
   constructor(
@@ -37,12 +39,14 @@ export class LanguageText {
     this.words = [];
     this.wordMap = new Map();
     this.sentenceIndexByWordIndex = [];
-    this.promises = [];
+    this.promise = new Promise((r) => r());
     this.setPage(currentPage);
   }
 
-  onLoad(): Promise<void[]> {
-    return Promise.all(this.promises);
+  async load(): Promise<void> {
+    await this.loadSentences();
+    await this.loadWords();
+    await this.loadTotalWordsTranslated();
   }
 
   onUpdateDefinition(word: string) {
@@ -52,9 +56,6 @@ export class LanguageText {
   setPage(n: number): boolean {
     if (n < 0 || n >= this.pages.length) return false;
     this.text = this.pages[n];
-    this.promises = [];
-    this.extractSentences();
-    this.extractWords();
     return true;
   }
 
@@ -85,51 +86,32 @@ export class LanguageText {
     return pages;
   }
 
-  extractWords() {
+  async loadWords() {
     this.wordMap = new Map();
     this.words = [];
     this.sentenceIndexByWordIndex = [];
-    this.sentences.forEach((sentence: RawSentence, sentenceIndex) => {
-      const words = sentence.getWords();
-      words.forEach((word: string) => {
+    let sentenceIndex = 0;
+    for (const rawSentence of this.sentences) {
+      const words = rawSentence.getWords();
+      for (const word of words) {
         let wordO = this.wordMap.get(word);
-        if (wordO) {
-          wordO.count += 1;
-        } else {
-          wordO = new Word(word, sentence.sentenceId as number);
-          this.wordMap.set(word, wordO);
+        if (wordO === undefined) {
+          wordO = await this.db.getWord(word);
+        }
+        if (wordO === undefined) {
+          wordO = new Word(word, rawSentence.sentenceId as number);
         }
         this.words.push(wordO);
+        this.wordMap.set(word, wordO);
         this.sentenceIndexByWordIndex.push(sentenceIndex);
-      });
-    });
-    this.promises.push(this.loadOrCreateWords());
-    this.words.forEach((word) => {
-      const promise = this.db.getWord(word.word).then((row: Word) => {
-        if (row !== undefined) {
-          word.definition = row.definition;
-          word.mastery = row.mastery;
-        }
-      });
-      this.promises.push(promise);
-    });
-    const promise = this.db.getNumberOfWords().then((n: number) => {
-      this.totalWordsTranslated = n;
-    });
-    this.promises.push(promise);
+      }
+      await this.db.putWords([...this.wordMap.values()]);
+      sentenceIndex += 1;
+    }
   }
 
-  async loadOrCreateWords(): Promise<void> {
-    for (let word of this.words) {
-      if (this.wordMap.has(word.word)) continue;
-      word = await this.db.getWord(word.word);
-      if (sentence === undefined) {
-        sentence = new Sentence(rawSentence.clean);
-        sentence.id = await this.db.putSentence(sentence);
-      }
-      this.sentenceMap.set(rawSentence.clean, sentence);
-      rawSentence.sentenceId = sentence.id;
-    }
+  async loadTotalWordsTranslated() {
+    this.totalWordsTranslated = await this.db.getNumberOfWords();
   }
 
   updateWordDefinition(word: string, definition: string) {
@@ -167,8 +149,6 @@ export class LanguageText {
     let newWords = 0;
     this.wordMap.forEach((data) => {
       wMastered += data.mastery;
-      numberOfWords += data.count;
-      countTranslated += data.getTranslatedCount();
       newWords += data.getNewCount();
     });
     const percentTranslated =
@@ -182,7 +162,7 @@ export class LanguageText {
     };
   }
 
-  extractSentences() {
+  async loadSentences() {
     let i = 0;
     this.sentences = [];
     this.sentenceMap = new Map();
@@ -199,10 +179,6 @@ export class LanguageText {
       if (endPos === false) break;
       i = endPos + 1;
     }
-    this.promises.push(this.loadOrCreateSentences());
-  }
-
-  async loadOrCreateSentences(): Promise<void> {
     for (const rawSentence of this.sentences) {
       if (this.sentenceMap.has(rawSentence.clean)) continue;
       let sentence = await this.db.getSentence(rawSentence.clean);

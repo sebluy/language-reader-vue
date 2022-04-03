@@ -97,14 +97,21 @@ export class LanguageDb {
     this.db.other.put({ key: "audioFile", value: file });
   }
 
+  async getSentencesForWords(words: Word[]): Promise<Map<number, Sentence>> {
+    const sentences = await this.db.sentences.bulkGet(
+      words.map((w: Word) => w.sentenceId)
+    );
+    return new Map(sentences.map((s: Sentence) => [s.id, s]));
+  }
+
   async getPracticeByType(type: number): Promise<Word[]> {
     const words = await this.db.words
       .where("mastery")
       .notEqual(Word.FULL_MASTERY)
       .toArray();
-    return words.filter(
-      (word: Word) => word.isDefined() && !word.hasMastery(type)
-    );
+    return words
+      .filter((word: Word) => word.isDefined() && !word.hasMastery(type))
+      .sort((a: Word, b: Word) => a.sentenceId - b.sentenceId);
   }
 
   async getMasteryCounts() {

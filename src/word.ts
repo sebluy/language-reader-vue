@@ -2,7 +2,6 @@ export class Word {
   word: string;
   definition: string;
   mastery: number;
-  count: number;
   sentenceId: number;
 
   static MASTERY_LEVELS = {
@@ -21,7 +20,6 @@ export class Word {
     this.sentenceId = sentenceId;
     this.definition = "";
     this.mastery = 0;
-    this.count = 1;
   }
 
   updateMastery(code: number) {
@@ -31,10 +29,6 @@ export class Word {
 
   hasMastery(code: number) {
     return this.mastery & code;
-  }
-
-  getTranslatedCount() {
-    return this.isDefined() ? this.count : 0;
   }
 
   isDefined() {
