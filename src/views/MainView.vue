@@ -1,11 +1,13 @@
 <script setup>
 import MainSidebar from "@/components/MainSidebar.vue";
 import TextReader from "@/components/TextReader.vue";
+import VocabInContext from "@/components/VocabInContext.vue";
 import { onMounted, reactive, shallowRef } from "vue";
 import { LanguageDb } from "@/language-db";
 import { LanguageText } from "@/language-text";
 import { Utility } from "@/utility";
 import { RuntimeData } from "@/runtime-data";
+import { Activity } from "@/activity";
 
 const db = new LanguageDb();
 const languageText = shallowRef(undefined);
@@ -15,6 +17,7 @@ const state = reactive({
   runtimeData: runtimeData,
   audioSrc: "",
   masteryCounts: {},
+  activity: Activity.READER,
 });
 
 const load = async () => {
@@ -120,12 +123,14 @@ onMounted(load);
       @update-language="updateLanguage"
       @import-database="importDatabase"
       @export-database="exportDatabase"
+      @change-activity="(activity) => (state.activity = activity)"
     />
     <TextReader
-      v-if="languageText"
+      v-if="state.activity === Activity.READER && languageText"
       :runtime-data="state.runtimeData"
       :language-text="languageText"
       @change-page-by="changePageBy"
     />
+    <VocabInContext v-if="state.activity === Activity.VOCAB_IN_CONTEXT" />
   </div>
 </template>

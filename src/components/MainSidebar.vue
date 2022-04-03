@@ -2,6 +2,7 @@
 import AudioPlayer from "@/components/AudioPlayer.vue";
 import StatisticsTable from "@/components/StatisticsTable.vue";
 import { Word } from "@/word";
+import { Activity } from "@/activity";
 import { onBeforeUpdate } from "vue";
 
 const props = defineProps([
@@ -15,6 +16,7 @@ const emit = defineEmits([
   "importDatabase",
   "exportDatabase",
   "openFiles",
+  "changeActivity",
 ]);
 onBeforeUpdate(() => console.log("Sidebar will update", props));
 const masteryOf = (type: number) => {
@@ -39,8 +41,8 @@ const masteryOf = (type: number) => {
       />
     </div>
     <div class="sidebar-group">
-      <button>Reader</button>
-      <button>
+      <button @click="emit('changeActivity', Activity.READER)">Reader</button>
+      <button @click="emit('changeActivity', Activity.VOCAB_IN_CONTEXT)">
         Vocabulary in Context
         {{ masteryOf(Word.MASTERY_LEVELS.VOCAB_IN_CONTEXT) }}
       </button>
