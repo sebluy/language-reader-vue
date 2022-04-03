@@ -3,7 +3,17 @@ export class Word {
   definition: string;
   mastery: number;
   count: number;
-  static MAX_MASTERY = 5;
+
+  static MASTERY_LEVELS = {
+    DEFINED: 1 << 0,
+    VOCAB_IN_CONTEXT: 1 << 1,
+    VOCAB_MATCHING: 1 << 2,
+    CLOZE: 1 << 3,
+    LISTENING1: 1 << 4,
+    LISTENING2: 1 << 5,
+  };
+
+  static FULL_MASTERY = 0b111111;
 
   constructor(word: string, definition = "", mastery = 0, count = 1) {
     this.word = word;
@@ -12,18 +22,37 @@ export class Word {
     this.count = count;
   }
 
-  nextMastery() {
-    if (this.mastery === Word.MAX_MASTERY) return this;
-    this.mastery += 1;
+  updateMastery(code: number) {
+    this.mastery |= code;
     return this;
   }
 
+  hasMastery(code: number) {
+    return this.mastery & code;
+  }
+
   getTranslatedCount() {
-    if (this.definition === "") return 0;
-    return this.count;
+    return this.isDefined() ? this.count : 0;
+  }
+
+  isDefined() {
+    return this.mastery & Word.MASTERY_LEVELS.DEFINED;
+  }
+
+  setDefinition(definition: string) {
+    this.definition = definition;
+    this.updateMastery(Word.MASTERY_LEVELS.DEFINED);
+  }
+
+  getMasteryPercentage(): number {
+    let count = 0;
+    for (let i = 1; i <= Word.MASTERY_LEVELS.LISTENING2; i <<= 1) {
+      if (i & this.mastery) count += 1;
+    }
+    return count / Object.keys(Word.MASTERY_LEVELS).length;
   }
 
   getNewCount() {
-    return this.definition === "" ? 1 : 0;
+    return this.isDefined() ? 1 : 0;
   }
 }

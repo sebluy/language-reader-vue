@@ -122,11 +122,11 @@ export class LanguageText {
     const wordData = this.wordMap.get(word);
     if (wordData === undefined) return;
     if (wordData.definition === definition) return;
-    if (wordData.definition === "") {
+    if (!wordData.isDefined()) {
       this.totalWordsTranslated += 1;
       this.onNewWordLearned();
     }
-    wordData.definition = definition;
+    wordData.setDefinition(definition);
     console.log("Updating definition... for " + word + " to " + definition);
     this.db.putWords([wordData]);
     this.onUpdateDefinition(word);

@@ -6,6 +6,7 @@ import { computed, onBeforeUpdate, reactive } from "vue";
 import WordCursor from "@/WordCursor";
 
 const props = defineProps(["languageText", "runtimeData"]);
+const emit = defineEmits(["changePageBy"]);
 const state = reactive({
   selectedWordCursor: new WordCursor(() => props.languageText),
   highlighting: false,
@@ -68,6 +69,10 @@ onBeforeUpdate(() => {
             @definition-update="updateSentenceDefinition"
             @next="state.selectedWordCursor.nextSentence()"
           />
+        </div>
+        <div class="sidebar-group">
+          <button @click="emit('changePageBy', -1)">Previous Page</button>
+          <button @click="emit('changePageBy', 1)">Next Page</button>
         </div>
         <div class="sidebar-group">
           <button @click="state.highlighting = !state.highlighting">

@@ -1,3 +1,13 @@
+// TODO: Redo "activities"
+// TODO: - Each word must be practiced once in each activity
+// TODO: - User picks activity and continues until out of words
+// TODO: - Words use sentence from first "seen" (translated)
+// TODO: - Words are practiced globally, not by page
+// TODO: - Word order is by "seen" sentence order ideally
+// TODO: - Will need to store the "sentence" for a word
+// TODO: - And maybe a sentence "id" for ordering
+// TODO: - Use a bitmap to track progress of word?
+
 // TODO: Using inject for runtimeData and languageText
 
 // TODO: Re-write using Vue

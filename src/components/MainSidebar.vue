@@ -1,17 +1,27 @@
 <script setup lang="ts">
 import AudioPlayer from "@/components/AudioPlayer.vue";
 import StatisticsTable from "@/components/StatisticsTable.vue";
+import { Word } from "@/word";
 import { onBeforeUpdate } from "vue";
 
-const props = defineProps(["runtimeData", "audioSrc", "statistics"]);
+const props = defineProps([
+  "runtimeData",
+  "audioSrc",
+  "statistics",
+  "masteryCounts",
+]);
 const emit = defineEmits([
-  "changePageBy",
   "updateLanguage",
   "importDatabase",
   "exportDatabase",
-  "updateStats",
+  "openFiles",
 ]);
 onBeforeUpdate(() => console.log("Sidebar will update", props));
+const masteryOf = (type: number) => {
+  if (props.masteryCounts === undefined) return "";
+  const count = props.masteryCounts[type];
+  return count > 0 ? `(${count})` : "";
+};
 </script>
 
 <template>
@@ -29,26 +39,29 @@ onBeforeUpdate(() => console.log("Sidebar will update", props));
       />
     </div>
     <div class="sidebar-group">
-      <select name="activity">
-        <option value="reader">Reader</option>
-        <option value="auto">Auto</option>
-        <option value="vocab-in-context">Vocabulary in Context</option>
-        <option value="vocab-matching">Vocabulary Matching</option>
-        <option value="listening">Listening</option>
-        <option value="listening2">Listening 2</option>
-        <option value="cloze">Cloze</option>
-        <option value="unscramble">Unscramble</option>
-      </select>
+      <button>Reader</button>
+      <button>
+        Vocabulary in Context
+        {{ masteryOf(Word.MASTERY_LEVELS.VOCAB_IN_CONTEXT) }}
+      </button>
+      <button>
+        Vocabulary Matching
+        {{ masteryOf(Word.MASTERY_LEVELS.VOCAB_MATCHING) }}
+      </button>
+      <button>
+        Cloze
+        {{ masteryOf(Word.MASTERY_LEVELS.CLOZE) }}
+      </button>
+      <button>
+        Listening 1
+        {{ masteryOf(Word.MASTERY_LEVELS.LISTENING1) }}
+      </button>
+      <button>
+        Listening 2
+        {{ masteryOf(Word.MASTERY_LEVELS.LISTENING2) }}
+      </button>
     </div>
-    <div class="sidebar-group">
-      <button @click="emit('changePageBy', -1)">Previous Page</button>
-      <button @click="emit('changePageBy', 1)">Next Page</button>
-    </div>
-    <StatisticsTable
-      v-if="props.statistics"
-      :statistics="props.statistics"
-      @update-stats="emit('updateStats')"
-    />
+<!--    <StatisticsTable v-if="props.statistics" :statistics="props.statistics" />-->
     <div class="sidebar-group">
       <button @click="emit('exportDatabase')">Export Database</button>
       <button @click="emit('importDatabase')">Import Database</button>

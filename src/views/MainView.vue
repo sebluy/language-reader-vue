@@ -14,22 +14,24 @@ let runtimeData = new RuntimeData();
 const state = reactive({
   runtimeData: runtimeData,
   audioSrc: "",
+  masteryCounts: {},
 });
 
 const load = async () => {
   runtimeData = await db.getRuntimeData();
   state.runtimeData = runtimeData;
   state.runtimeData.updateForNewDay();
+  state.masteryCounts = await db.getMasteryCounts();
   console.log(state.runtimeData);
   if (state.runtimeData.openTextFile) {
     const text = await db.getTextFile();
     languageText.value = await createLanguageText(text);
+    updateStats();
   }
   if (state.runtimeData.openAudioFile) {
     let audio = await db.getAudioFile();
     state.audioSrc = URL.createObjectURL(audio);
   }
-  updateStats();
 };
 
 const createLanguageText = async (text) => {
@@ -59,13 +61,13 @@ const openFiles = async () => {
     state.runtimeData.openNewTextFile(textFile.name);
     languageText.value = await createLanguageText(text);
     db.putTextFile(text);
+    updateStats();
   }
   if (audioFile) {
     state.runtimeData.openNewAudioFile(audioFile.name);
     state.audioSrc = URL.createObjectURL(audioFile);
     db.putAudioFile(audioFile);
   }
-  updateStats();
   console.log("New state", state);
   db.putRuntimeData(runtimeData);
 };
@@ -113,10 +115,9 @@ onMounted(load);
       :runtime-data="state.runtimeData"
       :audio-src="state.audioSrc"
       :statistics="state.statistics"
+      :mastery-counts="state.masteryCounts"
       @open-files="openFiles"
-      @change-page-by="changePageBy"
       @update-language="updateLanguage"
-      @update-stats="updateStats"
       @import-database="importDatabase"
       @export-database="exportDatabase"
     />
@@ -124,6 +125,7 @@ onMounted(load);
       v-if="languageText"
       :runtime-data="state.runtimeData"
       :language-text="languageText"
+      @change-page-by="changePageBy"
     />
   </div>
 </template>

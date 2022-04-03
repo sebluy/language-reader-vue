@@ -8,8 +8,8 @@ export class LanguageDb {
 
   constructor() {
     this.db = new Dexie("LanguageDB");
-    this.db.version(1).stores({
-      words: "word",
+    this.db.version(2).stores({
+      words: "word, mastery",
       sentences: "sentence",
       other: "key",
     });
@@ -91,5 +91,23 @@ export class LanguageDb {
 
   putAudioFile(file: File) {
     this.db.other.put({ key: "audioFile", value: file });
+  }
+
+  async getMasteryCounts() {
+    const words = await this.db.words
+      .where("mastery")
+      .notEqual(Word.FULL_MASTERY)
+      .toArray();
+    const counts: any = {};
+    const levels = Object.values(Word.MASTERY_LEVELS);
+    levels.forEach((type: number) => {
+      counts[type] = 0;
+    });
+    words.forEach((word: Word) => {
+      levels.forEach((type: number) => {
+        if (word.isDefined() && !word.hasMastery(type)) counts[type] += 1;
+      });
+    });
+    return counts;
   }
 }

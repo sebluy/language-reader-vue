@@ -1,7 +1,6 @@
 <script>
 import { h } from "vue";
 import { Utility } from "@/utility";
-import { Word } from "@/word";
 
 export default {
   props: ["languageText", "selectedWordIndex", "highlighting"],
@@ -9,9 +8,9 @@ export default {
   setup(props, ctx) {
     const wordHighlighting = (word) => {
       let wordO = props.languageText.wordMap.get(word);
-      if (!props.highlighting || wordO.definition === "")
+      if (!props.highlighting || !wordO.isDefined())
         return { backgroundColor: "" };
-      let hue = ((wordO.mastery / Word.MAX_MASTERY) * 120).toString(10);
+      let hue = (wordO.getMasteryPercentage() * 120).toString(10);
       return { backgroundColor: "hsl(" + hue + ",100%,75%)" };
     };
     return () => {

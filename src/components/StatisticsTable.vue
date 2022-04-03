@@ -1,6 +1,5 @@
 <script setup>
 const props = defineProps(["statistics"]);
-const emit = defineEmits(["updateStats"]);
 
 const fp = (p) => (p * 100).toFixed(2) + "%";
 const s = () => props.statistics;
@@ -40,6 +39,5 @@ const s = () => props.statistics;
         </tr>
       </tbody>
     </table>
-    <button @click="emit('updateStats')">Update Stats</button>
   </div>
 </template>
