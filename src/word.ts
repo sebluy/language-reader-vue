@@ -3,6 +3,7 @@ export class Word {
   definition: string;
   mastery: number;
   count: number;
+  sentenceId: number;
 
   static MASTERY_LEVELS = {
     DEFINED: 1 << 0,
@@ -15,11 +16,12 @@ export class Word {
 
   static FULL_MASTERY = 0b111111;
 
-  constructor(word: string, definition = "", mastery = 0, count = 1) {
+  constructor(word: string, sentenceId: number) {
     this.word = word;
-    this.definition = definition;
-    this.mastery = mastery;
-    this.count = count;
+    this.sentenceId = sentenceId;
+    this.definition = "";
+    this.mastery = 0;
+    this.count = 1;
   }
 
   updateMastery(code: number) {

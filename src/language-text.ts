@@ -96,13 +96,14 @@ export class LanguageText {
         if (wordO) {
           wordO.count += 1;
         } else {
-          wordO = new Word(word);
+          wordO = new Word(word, sentence.sentenceId as number);
           this.wordMap.set(word, wordO);
         }
         this.words.push(wordO);
         this.sentenceIndexByWordIndex.push(sentenceIndex);
       });
     });
+    this.promises.push(this.loadOrCreateWords());
     this.words.forEach((word) => {
       const promise = this.db.getWord(word.word).then((row: Word) => {
         if (row !== undefined) {
@@ -116,6 +117,19 @@ export class LanguageText {
       this.totalWordsTranslated = n;
     });
     this.promises.push(promise);
+  }
+
+  async loadOrCreateWords(): Promise<void> {
+    for (let word of this.words) {
+      if (this.wordMap.has(word.word)) continue;
+      word = await this.db.getWord(word.word);
+      if (sentence === undefined) {
+        sentence = new Sentence(rawSentence.clean);
+        sentence.id = await this.db.putSentence(sentence);
+      }
+      this.sentenceMap.set(rawSentence.clean, sentence);
+      rawSentence.sentenceId = sentence.id;
+    }
   }
 
   updateWordDefinition(word: string, definition: string) {
@@ -182,23 +196,23 @@ export class LanguageText {
       if (text === "") break;
       const clean = text.trim();
       this.sentences.push(new RawSentence(text, clean));
-      this.sentenceMap.set(clean, new Sentence(clean));
       if (endPos === false) break;
       i = endPos + 1;
     }
-    this.sentenceMap.forEach((sentence) => {
-      const promise = this.db
-        .getSentence(sentence.sentence)
-        .then((row: Sentence) => {
-          if (row !== undefined) {
-            if (row.definition !== undefined)
-              sentence.definition = row.definition;
-            sentence.startTime = row.startTime;
-            sentence.endTime = row.endTime;
-          }
-        });
-      this.promises.push(promise);
-    });
+    this.promises.push(this.loadOrCreateSentences());
+  }
+
+  async loadOrCreateSentences(): Promise<void> {
+    for (const rawSentence of this.sentences) {
+      if (this.sentenceMap.has(rawSentence.clean)) continue;
+      let sentence = await this.db.getSentence(rawSentence.clean);
+      if (sentence === undefined) {
+        sentence = new Sentence(rawSentence.clean);
+        sentence.id = await this.db.putSentence(sentence);
+      }
+      this.sentenceMap.set(rawSentence.clean, sentence);
+      rawSentence.sentenceId = sentence.id;
+    }
   }
 
   // getRandomSentenceBlock(n)

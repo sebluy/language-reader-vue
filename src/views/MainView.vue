@@ -131,6 +131,9 @@ onMounted(load);
       :language-text="languageText"
       @change-page-by="changePageBy"
     />
-    <VocabInContext v-if="state.activity === Activity.VOCAB_IN_CONTEXT" />
+    <VocabInContext
+      v-if="state.activity === Activity.VOCAB_IN_CONTEXT"
+      :db="db"
+    />
   </div>
 </template>

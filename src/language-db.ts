@@ -10,7 +10,7 @@ export class LanguageDb {
     this.db = new Dexie("LanguageDB");
     this.db.version(2).stores({
       words: "word, mastery",
-      sentences: "sentence",
+      sentences: "++id, sentence",
       other: "key",
     });
     this.db.words.mapToClass(Word);
@@ -22,7 +22,11 @@ export class LanguageDb {
   }
 
   getSentence(sentence: string): Promise<Sentence> {
-    return this.db.sentences.get(sentence);
+    return this.db.sentences.where("sentence").equals(sentence).first();
+  }
+
+  getSentenceById(id: number): Promise<Sentence> {
+    return this.db.sentences.get(id);
   }
 
   getNumberOfWords(): Promise<number> {
@@ -91,6 +95,16 @@ export class LanguageDb {
 
   putAudioFile(file: File) {
     this.db.other.put({ key: "audioFile", value: file });
+  }
+
+  async getPracticeByType(type: number): Promise<Word[]> {
+    const words = await this.db.words
+      .where("mastery")
+      .notEqual(Word.FULL_MASTERY)
+      .toArray();
+    return words.filter(
+      (word: Word) => word.isDefined() && !word.hasMastery(type)
+    );
   }
 
   async getMasteryCounts() {

@@ -3,6 +3,7 @@ import { Utility } from "@/utility";
 export class RawSentence {
   raw: string;
   clean: string;
+  sentenceId: number | undefined;
 
   constructor(raw: string, clean: string) {
     this.raw = raw;

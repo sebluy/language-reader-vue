@@ -1,4 +1,5 @@
 export class Sentence {
+  id: number | undefined;
   sentence: string;
   definition: string;
   mastery: number;
