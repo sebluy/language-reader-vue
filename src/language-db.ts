@@ -131,4 +131,8 @@ export class LanguageDb {
     });
     return counts;
   }
+
+  async getAllWords() {
+    return await this.db.words.toArray();
+  }
 }

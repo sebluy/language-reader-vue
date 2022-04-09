@@ -134,6 +134,7 @@ onMounted(load);
     <VocabInContext
       v-if="state.activity === Activity.VOCAB_IN_CONTEXT"
       :db="db"
+      @done="state.activity = Activity.READER"
     />
   </div>
 </template>
