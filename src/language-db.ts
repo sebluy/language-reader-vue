@@ -2,6 +2,7 @@ import { RuntimeData } from "@/runtime-data";
 import { Sentence } from "@/sentence";
 import { Word } from "@/word";
 import Dexie from "dexie";
+import {Utility} from "@/utility";
 
 export class LanguageDb {
   db: any;
@@ -105,13 +106,13 @@ export class LanguageDb {
   }
 
   async getPracticeByType(type: number): Promise<Word[]> {
-    const words = await this.db.words
+    const w1 = await this.db.words
       .where("mastery")
       .notEqual(Word.FULL_MASTERY)
       .toArray();
-    return words
-      .filter((word: Word) => word.isDefined() && !word.hasMastery(type))
-      .sort((a: Word, b: Word) => a.sentenceId - b.sentenceId);
+    const w2 = w1.filter((word: Word) => word.isDefined() && !word.hasMastery(type));
+    Utility.shuffle(w2);
+    return w2;
   }
 
   async getMasteryCounts() {

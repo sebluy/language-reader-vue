@@ -23,7 +23,7 @@ const rawSentences = computed(() => {
 });
 
 const wordOptions = (raw, clean) => {
-  return clean === word.value.word ? { bold: true } : {};
+  return clean === word.value.word ? { blank: true } : {};
 };
 
 const correctAnswer = () => {
@@ -33,23 +33,23 @@ const correctAnswer = () => {
 
 onMounted(async () => {
   const practiceWords = await props.db.getPracticeByType(
-    Word.MASTERY_LEVELS.VOCAB_IN_CONTEXT
+    Word.MASTERY_LEVELS.CLOZE
   );
   const sentences = await props.db.getSentencesForWords(practiceWords);
   const poolWords = await props.db.getAllWords();
   state.practiceWords = practiceWords;
   state.sentences = sentences;
-  state.poolWords = poolWords.map((w) => w.definition).filter((d) => d !== "");
+  state.poolWords = poolWords.map((w) => w.word);
 });
 </script>
 
 <template>
-  <MainWindow v-if="word" :title="Activity.VOCAB_IN_CONTEXT">
+  <MainWindow v-if="word" :title="Activity.CLOZE">
     <template v-slot:activity>
       <TextView :sentences="rawSentences" :word-options="wordOptions" />
       <MultipleChoice
         :pool="state.poolWords"
-        :solution="word.definition"
+        :solution="word.word"
         @correct-answer="correctAnswer"
       />
     </template>

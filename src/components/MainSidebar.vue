@@ -50,7 +50,7 @@ const masteryOf = (type: number) => {
         Vocabulary Matching
         {{ masteryOf(Word.MASTERY_LEVELS.VOCAB_MATCHING) }}
       </button>
-      <button>
+      <button @click="emit('changeActivity', Activity.CLOZE)">
         Cloze
         {{ masteryOf(Word.MASTERY_LEVELS.CLOZE) }}
       </button>

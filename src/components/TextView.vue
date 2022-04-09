@@ -3,7 +3,7 @@ import { h } from "vue";
 import { Utility } from "@/utility";
 
 export default {
-  props: ["sentences", "wordMap", "selectedWordIndex", "highlighting", "wordClass"],
+  props: ["sentences", "wordMap", "selectedWordIndex", "highlighting", "wordOptions"],
   emits: ["selectWord"],
 
   setup(props, ctx) {
@@ -32,8 +32,11 @@ export default {
             selected: selected,
           };
           // TODO: Refactor this?
-          if (props.wordClass) {
-            classO = { ...classO, ...props.wordClass(word, cWord) };
+          let content = word;
+          if (props.wordOptions) {
+            const options = props.wordOptions(word, cWord);
+            if (options.bold) classO.bold = true;
+            if (options.blank) content = "__________";
           }
           let spanProps = {
             key: wi2,
@@ -43,7 +46,7 @@ export default {
               ctx.emit("selectWord", wi2);
             },
           };
-          return h("span", spanProps, word);
+          return h("span", spanProps, content);
         });
         return h("span", { key: si }, wordSpans);
       });
