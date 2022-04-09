@@ -3,11 +3,13 @@ import { h } from "vue";
 import { Utility } from "@/utility";
 
 export default {
-  props: ["languageText", "selectedWordIndex", "highlighting"],
+  props: ["sentences", "wordMap", "selectedWordIndex", "highlighting", "wordClass"],
   emits: ["selectWord"],
+
   setup(props, ctx) {
     const wordHighlighting = (word) => {
-      let wordO = props.languageText.wordMap.get(word);
+      if (props.wordMap === undefined) return "";
+      let wordO = props.wordMap.get(word);
       if (!props.highlighting || !wordO.isDefined())
         return { backgroundColor: "" };
       let hue = (wordO.getMasteryPercentage() * 120).toString(10);
@@ -16,8 +18,8 @@ export default {
     return () => {
       console.log("Rendering TextView", props);
       let wi = 0;
-      if (props.languageText === undefined) return h("p");
-      let sentenceSpans = props.languageText.sentences.map((sentence, si) => {
+      if (props.sentences === undefined) return h("p");
+      let sentenceSpans = props.sentences.map((sentence, si) => {
         let wordsAndSpaces = sentence.getWordsAndSpaces();
         let wordSpans = wordsAndSpaces.map((word) => {
           if (word.trim() === "") return word;
@@ -26,10 +28,17 @@ export default {
           let wi2 = wi;
           wi += 1;
           let selected = props.selectedWordIndex === wi2;
+          let classO = {
+            selected: selected,
+          };
+          // TODO: Refactor this?
+          if (props.wordClass) {
+            classO = { ...classO, ...props.wordClass(word, cWord) };
+          }
           let spanProps = {
             key: wi2,
             style: selected ? "" : wordHighlighting(cWord),
-            className: selected ? "selected" : "",
+            class: classO,
             onClick() {
               ctx.emit("selectWord", wi2);
             },

@@ -39,7 +39,8 @@ onBeforeUpdate(() => {
   >
     <template v-slot:activity>
       <TextView
-        :language-text="props.languageText"
+        :sentences="props.languageText.sentences"
+        :word-map="props.languageText.wordMap"
         :key="props.runtimeData.currentPage"
         :selected-word-index="state.selectedWordCursor.getIndex()"
         :highlighting="state.highlighting"

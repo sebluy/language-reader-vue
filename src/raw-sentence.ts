@@ -5,12 +5,13 @@ export class RawSentence {
   clean: string;
   sentenceId: number | undefined;
 
-  constructor(raw: string, clean: string) {
+  constructor(raw: string, clean: string, sentenceId = undefined) {
     this.raw = raw;
     this.clean = clean;
+    this.sentenceId = sentenceId;
   }
 
-  getWords(): [string] {
+  getWords(): string[] {
     return this.clean
       .split(/\s+/)
       .map(Utility.cleanWord)
