@@ -2,6 +2,7 @@
 import MainSidebar from "@/components/MainSidebar.vue";
 import TextReader from "@/components/TextReader.vue";
 import VocabInContext from "@/components/VocabInContext.vue";
+import VocabMatching from "@/components/VocabMatching.vue";
 import ClozeActivity from "@/components/ClozeActivity.vue";
 import Listening1 from "@/components/Listening1.vue";
 import Listening2 from "@/components/Listening2.vue";
@@ -138,6 +139,11 @@ onMounted(load);
     />
     <VocabInContext
       v-if="state.activity === Activity.VOCAB_IN_CONTEXT"
+      :db="db"
+      @done="state.activity = Activity.READER"
+    />
+    <VocabMatching
+      v-if="state.activity === Activity.VOCAB_MATCHING"
       :db="db"
       @done="state.activity = Activity.READER"
     />
