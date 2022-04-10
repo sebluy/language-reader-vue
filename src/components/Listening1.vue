@@ -5,22 +5,31 @@ import MultipleChoice from "@/components/MultipleChoice.vue";
 import { Activity } from "@/activity";
 
 const props = defineProps(["db"]);
+const emit = defineEmits(["set-audio"]);
 
-const wordOptions = (word, raw, clean) => {
-  return clean === word.word ? { blank: true } : {};
+const wordOptions = (slotProps) => {
+  return (raw, clean) => {
+    return clean === slotProps.word.word ? { blank: true } : {};
+  };
 };
 
 const poolWords = (pool) => {
   return pool.map((w) => w.word);
 };
+
+const correctAnswer = (slotProps) => {
+  slotProps.correctAnswer();
+  emit("set-audio");
+};
+
 </script>
 
 <template>
-  <SentenceActivity :activity="Activity.CLOZE" :db="props.db">
+  <SentenceActivity :activity="Activity.LISTENING1" :db="props.db">
     <template #sentence-activity="slotProps">
       <TextView
         :sentences="slotProps.rawSentences"
-        :word-options="(raw, clean) => wordOptions(slotProps.word, raw, clean)"
+        :word-options="wordOptions(slotProps)"
       />
       <MultipleChoice
         :pool="poolWords(slotProps.poolWords)"

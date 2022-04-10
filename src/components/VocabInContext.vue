@@ -1,57 +1,32 @@
 <script setup>
-import MainWindow from "@/components/MainWindow.vue";
 import TextView from "@/components/TextView.vue";
 import MultipleChoice from "@/components/MultipleChoice.vue";
-import { computed, onMounted, reactive } from "vue";
-import { Word } from "@/word";
-import { RawSentence } from "@/raw-sentence";
+import SentenceActivity from "@/components/SentenceActivity.vue";
 import { Activity } from "@/activity";
 
 const props = defineProps(["db"]);
-const emit = defineEmits(["done"]);
-const state = reactive({
-  practiceWords: [],
-  wordIndex: 0,
-  sentences: new Map(),
-});
 
-const word = computed(() => state.practiceWords[state.wordIndex]);
-const rawSentences = computed(() => {
-  if (word.value === undefined) return undefined;
-  const sentence = state.sentences.get(word.value.sentenceId);
-  return [new RawSentence(sentence.sentence, sentence.sentence, sentence.id)];
-});
-
-const wordOptions = (raw, clean) => {
-  return clean === word.value.word ? { bold: true } : {};
+const wordOptions = (word, raw, clean) => {
+  return clean === word.word ? { bold: true } : {};
 };
 
-const correctAnswer = () => {
-  state.wordIndex += 1;
-  if (state.wordIndex === state.practiceWords.length) emit("done");
+const poolWords = (pool) => {
+  return pool.map((w) => w.definition).filter((d) => d !== "");
 };
-
-onMounted(async () => {
-  const practiceWords = await props.db.getPracticeByType(
-    Word.MASTERY_LEVELS.VOCAB_IN_CONTEXT
-  );
-  const sentences = await props.db.getSentencesForWords(practiceWords);
-  const poolWords = await props.db.getAllWords();
-  state.practiceWords = practiceWords;
-  state.sentences = sentences;
-  state.poolWords = poolWords.map((w) => w.definition).filter((d) => d !== "");
-});
 </script>
 
 <template>
-  <MainWindow v-if="word" :title="Activity.VOCAB_IN_CONTEXT">
-    <template v-slot:activity>
-      <TextView :sentences="rawSentences" :word-options="wordOptions" />
+  <SentenceActivity :activity="Activity.VOCAB_IN_CONTEXT" :db="props.db" >
+    <template #sentence-activity="slotProps">
+      <TextView
+        :sentences="slotProps.rawSentences"
+        :word-options="(raw, clean) => wordOptions(slotProps.word, raw, clean)"
+      />
       <MultipleChoice
-        :pool="state.poolWords"
-        :solution="word.definition"
-        @correct-answer="correctAnswer"
+        :pool="poolWords(slotProps.poolWords)"
+        :solution="slotProps.word.definition"
+        @correct-answer="slotProps.correctAnswer"
       />
     </template>
-  </MainWindow>
+  </SentenceActivity>
 </template>

@@ -16,7 +16,9 @@ let runtimeData = new RuntimeData();
 
 const state = reactive({
   runtimeData: runtimeData,
-  audioSrc: "",
+  audio: {
+    src: "",
+  },
   masteryCounts: {},
   activity: Activity.READER,
 });
@@ -34,7 +36,7 @@ const load = async () => {
   }
   if (state.runtimeData.openAudioFile) {
     let audio = await db.getAudioFile();
-    state.audioSrc = URL.createObjectURL(audio);
+    state.audio.src = URL.createObjectURL(audio);
   }
 };
 
@@ -69,7 +71,7 @@ const openFiles = async () => {
   }
   if (audioFile) {
     state.runtimeData.openNewAudioFile(audioFile.name);
-    state.audioSrc = URL.createObjectURL(audioFile);
+    state.audio.src = URL.createObjectURL(audioFile);
     db.putAudioFile(audioFile);
   }
   console.log("New state", state);
@@ -117,7 +119,7 @@ onMounted(load);
   <div>
     <MainSidebar
       :runtime-data="state.runtimeData"
-      :audio-src="state.audioSrc"
+      :audio="state.audio"
       :statistics="state.statistics"
       :mastery-counts="state.masteryCounts"
       @open-files="openFiles"

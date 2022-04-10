@@ -7,7 +7,7 @@ import { onBeforeUpdate } from "vue";
 
 const props = defineProps([
   "runtimeData",
-  "audioSrc",
+  "audio",
   "statistics",
   "masteryCounts",
 ]);
@@ -31,7 +31,7 @@ const masteryOf = (type: number) => {
     <div class="sidebar-group">
       <h3>{{ props.runtimeData.openTextFile }}</h3>
       <h4>{{ props.runtimeData.openAudioFile }}</h4>
-      <AudioPlayer :src="props.audioSrc" />
+      <AudioPlayer :audio="props.audio" />
       <button @click="$emit('openFiles')">Open Files</button>
       <input
         :value="props.runtimeData.language"
