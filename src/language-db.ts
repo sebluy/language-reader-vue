@@ -144,7 +144,11 @@ export class LanguageDb {
     return counts;
   }
 
-  async getAllWords() {
+  async getAllWords(): Promise<Word[]> {
     return await this.db.words.toArray();
+  }
+
+  async getAllSentences(): Promise<Sentence[]> {
+    return await this.db.sentences.toArray();
   }
 }

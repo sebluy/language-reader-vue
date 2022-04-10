@@ -1,5 +1,4 @@
 <script setup>
-import TextView from "@/components/TextView.vue";
 import MultipleChoice from "@/components/MultipleChoice.vue";
 import MainWindow from "@/components/MainWindow.vue";
 import { Activity } from "@/activity";
@@ -15,14 +14,6 @@ const emitter = useEmitter();
 const sentenceActivity = reactive(
   new SentenceActivity(props.db, () => emit("done"))
 );
-
-const wordOptions = (raw, clean) => {
-  return clean === sentenceActivity.word().word ? { blank: true } : {};
-};
-
-const wordPool = () => {
-  return sentenceActivity.wordPool.map((w) => w.word);
-};
 
 const emitSentenceAudio = () => {
   const sentence = sentenceActivity.sentence();
@@ -42,15 +33,11 @@ onBeforeUpdate(() => {
 </script>
 
 <template>
-  <MainWindow v-if="sentenceActivity.word()" :title="Activity.VOCAB_IN_CONTEXT">
+  <MainWindow v-if="sentenceActivity.sentence()" :title="Activity.LISTENING2">
     <template #activity>
-      <TextView
-        :sentences="sentenceActivity.rawSentences()"
-        :word-options="wordOptions"
-      />
       <MultipleChoice
-        :pool="wordPool()"
-        :solution="sentenceActivity.word().word"
+        :pool="sentenceActivity.sentencePool"
+        :solution="sentenceActivity.sentence().definition"
         @correct-answer="() => sentenceActivity.correctAnswer()"
       />
     </template>

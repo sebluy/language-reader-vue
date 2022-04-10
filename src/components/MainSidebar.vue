@@ -41,12 +41,14 @@ const masteryOf = (type: number) => {
       />
     </div>
     <div class="sidebar-group">
-      <button @click="emit('changeActivity', Activity.READER)">Reader</button>
+      <button @click="emit('changeActivity', Activity.READER)">
+        Reader
+      </button>
       <button @click="emit('changeActivity', Activity.VOCAB_IN_CONTEXT)">
         Vocabulary in Context
         {{ masteryOf(Word.MASTERY_LEVELS.VOCAB_IN_CONTEXT) }}
       </button>
-      <button>
+      <button @click="emit('changeActivity', Activity.VOCAB_MATCHING)">
         Vocabulary Matching
         {{ masteryOf(Word.MASTERY_LEVELS.VOCAB_MATCHING) }}
       </button>
@@ -54,11 +56,11 @@ const masteryOf = (type: number) => {
         Cloze
         {{ masteryOf(Word.MASTERY_LEVELS.CLOZE) }}
       </button>
-      <button>
+      <button @click="emit('changeActivity', Activity.LISTENING1)">
         Listening 1
         {{ masteryOf(Word.MASTERY_LEVELS.LISTENING1) }}
       </button>
-      <button>
+      <button @click="emit('changeActivity', Activity.LISTENING2)">
         Listening 2
         {{ masteryOf(Word.MASTERY_LEVELS.LISTENING2) }}
       </button>

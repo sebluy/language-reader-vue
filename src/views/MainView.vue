@@ -3,6 +3,8 @@ import MainSidebar from "@/components/MainSidebar.vue";
 import TextReader from "@/components/TextReader.vue";
 import VocabInContext from "@/components/VocabInContext.vue";
 import ClozeActivity from "@/components/ClozeActivity.vue";
+import Listening1 from "@/components/Listening1.vue";
+import Listening2 from "@/components/Listening2.vue";
 import { onMounted, reactive, shallowRef } from "vue";
 import { LanguageDb } from "@/language-db";
 import { LanguageText } from "@/language-text";
@@ -141,6 +143,16 @@ onMounted(load);
     />
     <ClozeActivity
       v-if="state.activity === Activity.CLOZE"
+      :db="db"
+      @done="state.activity = Activity.READER"
+    />
+    <Listening1
+      v-if="state.activity === Activity.LISTENING1"
+      :db="db"
+      @done="state.activity = Activity.READER"
+    />
+    <Listening2
+      v-if="state.activity === Activity.LISTENING2"
       :db="db"
       @done="state.activity = Activity.READER"
     />

@@ -1,32 +1,44 @@
 <script setup>
 import TextView from "@/components/TextView.vue";
-import SentenceActivity from "@/components/SentenceActivity.vue";
 import MultipleChoice from "@/components/MultipleChoice.vue";
+import MainWindow from "@/components/MainWindow.vue";
 import { Activity } from "@/activity";
+import SentenceActivity from "@/sentence-activity";
+import { onBeforeMount, reactive } from "vue";
 
+// TODO: deduplicate with other sentence activities
 const props = defineProps(["db"]);
+const emit = defineEmits(["done"]);
 
-const wordOptions = (word, raw, clean) => {
-  return clean === word.word ? { blank: true } : {};
+const sentenceActivity = reactive(
+  new SentenceActivity(props.db, () => emit("done"))
+);
+
+const wordOptions = (raw, clean) => {
+  return clean === sentenceActivity.word().word ? { blank: true } : {};
 };
 
-const poolWords = (pool) => {
-  return pool.map((w) => w.word);
+const wordPool = () => {
+  return sentenceActivity.wordPool.map((w) => w.word);
 };
+
+onBeforeMount(() => {
+  sentenceActivity.load();
+});
 </script>
 
 <template>
-  <SentenceActivity :activity="Activity.CLOZE" :db="props.db">
-    <template #sentence-activity="slotProps">
+  <MainWindow v-if="sentenceActivity.word()" :title="Activity.CLOZE">
+    <template #activity>
       <TextView
-        :sentences="slotProps.rawSentences"
-        :word-options="(raw, clean) => wordOptions(slotProps.word, raw, clean)"
+        :sentences="sentenceActivity.rawSentences()"
+        :word-options="wordOptions"
       />
       <MultipleChoice
-        :pool="poolWords(slotProps.poolWords)"
-        :solution="slotProps.word.word"
-        @correct-answer="slotProps.correctAnswer"
+        :pool="wordPool()"
+        :solution="sentenceActivity.word().word"
+        @correct-answer="() => sentenceActivity.correctAnswer()"
       />
     </template>
-  </SentenceActivity>
+  </MainWindow>
 </template>

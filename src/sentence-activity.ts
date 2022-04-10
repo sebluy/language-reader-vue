@@ -8,6 +8,7 @@ export default class {
   wordIndex: number;
   sentences: Map<number, Sentence>;
   wordPool: Word[];
+  sentencePool: string[];
   db: LanguageDb;
   done: () => void;
 
@@ -17,6 +18,7 @@ export default class {
     this.wordIndex = 0;
     this.sentences = new Map();
     this.wordPool = [];
+    this.sentencePool = [];
     this.done = done;
   }
 
@@ -43,6 +45,7 @@ export default class {
   }
 
   correctAnswer() {
+    // TODO: Update language DB with new mastery
     this.wordIndex += 1;
     if (this.wordIndex === this.practiceWords.length) this.done();
   }
@@ -53,9 +56,13 @@ export default class {
     );
     const sentences = await this.db.getSentencesForWords(practiceWords);
     const wordPool = await this.db.getAllWords();
+    const sentencePool = (await this.db.getAllSentences()).map(
+      (sentence: Sentence) => sentence.definition
+    );
     this.practiceWords = practiceWords;
     this.sentences = sentences;
     this.wordPool = wordPool;
+    this.sentencePool = sentencePool;
     console.log(this.wordPool);
   }
 }

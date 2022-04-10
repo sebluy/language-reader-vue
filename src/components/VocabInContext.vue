@@ -4,9 +4,9 @@ import MultipleChoice from "@/components/MultipleChoice.vue";
 import MainWindow from "@/components/MainWindow.vue";
 import { Activity } from "@/activity";
 import SentenceActivity from "@/sentence-activity";
-import {onBeforeMount, onBeforeUpdate, onMounted, reactive} from "vue";
+import { onBeforeMount, onBeforeUpdate, reactive } from "vue";
 import useEmitter from "@/composables/useEmitter";
-import {GlobalEvents} from "@/global-events";
+import { GlobalEvents } from "@/global-events";
 
 const props = defineProps(["db"]);
 const emit = defineEmits(["done"]);
