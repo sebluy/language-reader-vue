@@ -6,7 +6,6 @@ import { GlobalEvents } from "@/global-events";
 const props = defineProps(["audio"]);
 const audio = ref(null);
 const emitter = useEmitter();
-let playing = false;
 let startTime;
 let endTime;
 let timeout;
@@ -26,6 +25,16 @@ const reset = () => {
   pause();
 };
 
+const toggle = () => {
+  if (audio.value.paused) play();
+  else pause();
+};
+
+const replay = () => {
+  reset();
+  play();
+};
+
 const pause = () => {
   clearTimeout(timeout);
   if (!audio.value.paused) audio.value.pause();
@@ -42,16 +51,21 @@ const keyListener = (e) => {
     e.target instanceof HTMLInputElement ||
     e.target instanceof HTMLTextAreaElement;
   if (input) return;
-  if (e.key !== "p") return;
-  playing = !playing;
-  if (playing) pause();
-  else play();
+  if (e.key === "p") {
+    toggle();
+  } else if (e.key === "r") {
+    replay();
+  }
 };
 
 onMounted(() => {
   document.addEventListener("keydown", keyListener);
   emitter.on(GlobalEvents.SET_AUDIO_TIMES, ({ start, end }) => {
     setTimes(start, end);
+  });
+  emitter.on(GlobalEvents.SET_AUDIO_TIMES_AND_PLAY, ({ start, end }) => {
+    setTimes(start, end);
+    play();
   });
 });
 

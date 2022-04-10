@@ -20,14 +20,19 @@ export default class {
     this.done = done;
   }
 
-  word(): Word {
+  word(): Word | undefined {
     return this.practiceWords[this.wordIndex];
   }
 
-  rawSentences() {
+  sentence(): Sentence | undefined {
     const word = this.word();
     if (word === undefined) return undefined;
-    const sentence = this.sentences.get(word.sentenceId) as Sentence;
+    return this.sentences.get(word.sentenceId);
+  }
+
+  rawSentences() {
+    const sentence = this.sentence();
+    if (sentence === undefined) return [];
     return [
       new RawSentence(
         sentence.sentence,
