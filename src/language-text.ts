@@ -101,10 +101,15 @@ export class LanguageText {
         if (wordO === undefined) {
           wordO = new Word(word, rawSentence.sentenceId as number);
         }
+        // TODO: this can be removed after migrating DB
+        if (wordO.sentenceId === undefined) {
+          wordO.sentenceId = rawSentence.sentenceId as number;
+        }
         this.words.push(wordO);
         this.wordMap.set(word, wordO);
         this.sentenceIndexByWordIndex.push(sentenceIndex);
       }
+      // TODO: Fix this inefficiency
       await this.db.putWords([...this.wordMap.values()]);
       sentenceIndex += 1;
     }

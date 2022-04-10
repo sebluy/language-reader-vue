@@ -17,11 +17,13 @@ const play = () => {
   audio.value.play();
   if (endTime) {
     let remaining = endTime - audio.value.currentTime;
-    timeout = window.setTimeout(() => {
-      audio.value.currentTime = startTime;
-      audio.value.pause();
-    }, remaining * 1000);
+    timeout = window.setTimeout(reset, remaining * 1000);
   }
+};
+
+const reset = () => {
+  if (startTime) audio.value.currentTime = startTime;
+  pause();
 };
 
 const pause = () => {
@@ -30,10 +32,9 @@ const pause = () => {
 };
 
 const setTimes = (start, end) => {
-  if (start !== undefined) audio.value.currentTime = startTime;
-  pause();
   startTime = start;
   endTime = end;
+  reset();
 };
 
 const keyListener = (e) => {

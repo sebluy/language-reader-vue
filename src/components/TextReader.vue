@@ -2,7 +2,7 @@
 import MainWindow from "@/components/MainWindow.vue";
 import TextView from "@/components/TextView.vue";
 import DefinitionInput from "@/components/DefinitionInput.vue";
-import { computed, onBeforeUpdate, reactive } from "vue";
+import {computed, onBeforeMount, onBeforeUpdate, reactive} from "vue";
 import useEmitter from "@/composables/useEmitter";
 import WordCursor from "@/WordCursor";
 import { GlobalEvents } from "@/global-events";
@@ -49,6 +49,11 @@ const clearSelectedWordForNewPage = () => {
 
 onBeforeUpdate(() => {
   clearSelectedWordForNewPage();
+  emitAudioTimeChanges();
+  console.log("Rendering TextReader", props);
+});
+
+onBeforeMount(() => {
   emitAudioTimeChanges();
   console.log("Rendering TextReader", props);
 });

@@ -5,7 +5,7 @@ export class RawSentence {
   clean: string;
   sentenceId: number | undefined;
 
-  constructor(raw: string, clean: string, sentenceId = undefined) {
+  constructor(raw: string, clean: string, sentenceId: undefined|number = undefined) {
     this.raw = raw;
     this.clean = clean;
     this.sentenceId = sentenceId;
