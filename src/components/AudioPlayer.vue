@@ -1,28 +1,35 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from "vue";
-import useEmitter from "@/composables/useEmitter";
-import { GlobalEvents } from "@/global-events";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { useAudioPlayerStore } from "@/stores/audio-player-store";
 
-const props = defineProps(["audio"]);
 const audio = ref(null);
-const emitter = useEmitter();
+const store = useAudioPlayerStore();
 let startTime;
 let endTime;
 let timeout;
 
 const play = () => {
   // TODO: Fix playback for 0
+  if (audio.value.paused) {
+    audio.value.play();
+    store.play();
+    resetTimeout();
+  }
+};
+
+const resetTimeout = () => {
   clearTimeout(timeout);
-  audio.value.play();
-  if (endTime) {
+  if (endTime && !audio.value.paused) {
     let remaining = endTime - audio.value.currentTime;
-    timeout = window.setTimeout(reset, remaining * 1000);
+    timeout = window.setTimeout(() => {
+      pause();
+      reset();
+    }, remaining * 1000);
   }
 };
 
 const reset = () => {
   if (startTime) audio.value.currentTime = startTime;
-  pause();
 };
 
 const toggle = () => {
@@ -32,18 +39,16 @@ const toggle = () => {
 
 const replay = () => {
   reset();
+  resetTimeout();
   play();
 };
 
 const pause = () => {
-  clearTimeout(timeout);
-  if (!audio.value.paused) audio.value.pause();
-};
-
-const setTimes = (start, end) => {
-  startTime = start;
-  endTime = end;
-  reset();
+  if (!audio.value.paused) {
+    audio.value.pause();
+    store.pause();
+    resetTimeout();
+  }
 };
 
 const keyListener = (e) => {
@@ -60,20 +65,25 @@ const keyListener = (e) => {
 
 onMounted(() => {
   document.addEventListener("keydown", keyListener);
-  emitter.on(GlobalEvents.SET_AUDIO_TIMES, ({ start, end }) => {
-    setTimes(start, end);
-  });
-  emitter.on(GlobalEvents.SET_AUDIO_TIMES_AND_PLAY, ({ start, end }) => {
-    setTimes(start, end);
-    play();
-  });
 });
 
 onBeforeUnmount(() => {
   document.removeEventListener("keydown", keyListener);
 });
+
+watch(store, () => {
+  if (startTime !== store.startTime || endTime !== store.endTime) {
+    startTime = store.startTime;
+    endTime = store.endTime;
+    reset();
+    resetTimeout();
+  }
+  if (audio.value.paused !== store.paused) {
+    toggle();
+  }
+});
 </script>
 
 <template>
-  <audio controls :src="props.audio.src" ref="audio" />
+  <audio controls :src="store.src" ref="audio" />
 </template>

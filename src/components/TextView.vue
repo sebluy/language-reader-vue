@@ -16,7 +16,6 @@ export default {
       return { backgroundColor: "hsl(" + hue + ",100%,75%)" };
     };
     return () => {
-      console.log("Rendering TextView", props);
       let wi = 0;
       if (props.sentences === undefined) return h("p");
       let sentenceSpans = props.sentences.map((sentence, si) => {

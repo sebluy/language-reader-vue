@@ -2,14 +2,13 @@
 import MainWindow from "@/components/MainWindow.vue";
 import TextView from "@/components/TextView.vue";
 import DefinitionInput from "@/components/DefinitionInput.vue";
-import {computed, onBeforeMount, onBeforeUpdate, reactive} from "vue";
-import useEmitter from "@/composables/useEmitter";
+import { computed, onBeforeMount, onBeforeUpdate, reactive } from "vue";
 import WordCursor from "@/WordCursor";
-import { GlobalEvents } from "@/global-events";
+import { useAudioPlayerStore } from "@/stores/audio-player-store";
 
 const props = defineProps(["languageText", "runtimeData"]);
+const audioPlayer = useAudioPlayerStore();
 const emit = defineEmits(["changePageBy"]);
-const emitter = useEmitter();
 const state = reactive({
   selectedWordCursor: new WordCursor(() => props.languageText),
   highlighting: false,
@@ -26,7 +25,7 @@ const updateWordDefinition = (...args) =>
 const updateSentenceDefinition = (...args) =>
   props.languageText.updateSentenceDefinition(...args);
 
-const emitAudioTimeChanges = () => {
+const updateAudioPlayer = () => {
   const sentences = props.languageText.sentences;
   const sentenceMap = props.languageText.sentenceMap;
   if (sentences.length === 0) return;
@@ -34,10 +33,8 @@ const emitAudioTimeChanges = () => {
   const last = sentences[sentences.length - 1].clean;
   const start = sentenceMap.get(first).startTime;
   const end = sentenceMap.get(last).endTime;
-  emitter.emit(GlobalEvents.SET_AUDIO_TIMES, {
-    start: start,
-    end: end,
-  });
+  audioPlayer.setAudioTimes(start, end);
+  audioPlayer.pause();
 };
 
 const clearSelectedWordForNewPage = () => {
@@ -49,13 +46,11 @@ const clearSelectedWordForNewPage = () => {
 
 onBeforeUpdate(() => {
   clearSelectedWordForNewPage();
-  emitAudioTimeChanges();
-  console.log("Rendering TextReader", props);
+  updateAudioPlayer();
 });
 
 onBeforeMount(() => {
-  emitAudioTimeChanges();
-  console.log("Rendering TextReader", props);
+  updateAudioPlayer();
 });
 </script>
 

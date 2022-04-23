@@ -5,12 +5,11 @@ import MainWindow from "@/components/MainWindow.vue";
 import { Activity } from "@/activity";
 import SentenceActivity from "@/sentence-activity";
 import { onBeforeMount, onBeforeUpdate, reactive } from "vue";
-import useEmitter from "@/composables/useEmitter";
-import { GlobalEvents } from "@/global-events";
+import { useAudioPlayerStore } from "@/stores/audio-player-store";
 
 const props = defineProps(["db"]);
 const emit = defineEmits(["done"]);
-const emitter = useEmitter();
+const audioPlayer = useAudioPlayerStore();
 
 const sentenceActivity = reactive(
   new SentenceActivity(props.db, () => emit("done"))
@@ -26,20 +25,14 @@ const wordPool = () => {
     .map((w) => w.definition);
 };
 
-const emitSentenceAudio = () => {
-  const sentence = sentenceActivity.sentence();
-  emitter.emit(GlobalEvents.SET_AUDIO_TIMES_AND_PLAY, {
-    start: sentence.startTime,
-    end: sentence.endTime,
-  });
-};
-
 onBeforeMount(() => {
   sentenceActivity.load();
 });
 
 onBeforeUpdate(() => {
-  emitSentenceAudio();
+  const sentence = sentenceActivity.sentence();
+  audioPlayer.setAudioTimes(sentence.startTime, sentence.endTime);
+  audioPlayer.play();
 });
 </script>
 

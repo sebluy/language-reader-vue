@@ -12,16 +12,15 @@ import { LanguageText } from "@/language-text";
 import { Utility } from "@/utility";
 import { RuntimeData } from "@/runtime-data";
 import { Activity } from "@/activity";
+import { useAudioPlayerStore } from "@/stores/audio-player-store";
 
 const db = new LanguageDb();
 const languageText = shallowRef(undefined);
+const audioPlayer = useAudioPlayerStore();
 let runtimeData = new RuntimeData();
 
 const state = reactive({
   runtimeData: runtimeData,
-  audio: {
-    src: "",
-  },
   masteryCounts: {},
   activity: Activity.READER,
 });
@@ -39,7 +38,7 @@ const load = async () => {
   }
   if (state.runtimeData.openAudioFile) {
     let audio = await db.getAudioFile();
-    state.audio.src = URL.createObjectURL(audio);
+    audioPlayer.src = URL.createObjectURL(audio);
   }
 };
 
@@ -74,10 +73,9 @@ const openFiles = async () => {
   }
   if (audioFile) {
     state.runtimeData.openNewAudioFile(audioFile.name);
-    state.audio.src = URL.createObjectURL(audioFile);
+    audioPlayer.src = URL.createObjectURL(audioFile);
     db.putAudioFile(audioFile);
   }
-  console.log("New state", state);
   db.putRuntimeData(runtimeData);
 };
 
@@ -122,7 +120,6 @@ onMounted(load);
   <div>
     <MainSidebar
       :runtime-data="state.runtimeData"
-      :audio="state.audio"
       :statistics="state.statistics"
       :mastery-counts="state.masteryCounts"
       @open-files="openFiles"
