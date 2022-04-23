@@ -1,7 +1,7 @@
 <script setup>
 import MainWindow from "@/components/MainWindow.vue";
 import { Activity } from "@/activity";
-import { onBeforeMount, reactive, onMounted, onBeforeUnmount } from "vue";
+import {onBeforeMount, reactive, onMounted, onBeforeUnmount, toRaw} from "vue";
 import { Word } from "@/word";
 import { Utility } from "@/utility";
 
@@ -17,7 +17,7 @@ const state = reactive({
 
 onBeforeMount(async () => {
   state.practiceWords = await props.db.getPracticeByType(
-    Word.MASTERY_LEVELS.VOCAB_IN_CONTEXT
+    Word.MASTERY_LEVELS.VOCAB_MATCHING
   );
   reloadGrid();
 });
@@ -74,7 +74,11 @@ const swapWith = (xDel, yDel) => {
   state.grid[newY][newX] = state.grid[y][x];
   state.grid[y][x] = temp;
   if (checkAnswer()) {
-    // TODO: add mastery and XP
+    // TODO: Update runtime data
+    state.words.forEach((word) =>
+      word.updateMastery(Word.MASTERY_LEVELS.VOCAB_MATCHING)
+    );
+    this.db.putWords(toRaw(state.words));
     reloadGrid();
   }
 };

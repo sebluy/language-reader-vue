@@ -2,8 +2,10 @@ import { LanguageDb } from "@/language-db";
 import { Sentence } from "@/sentence";
 import { RawSentence } from "@/raw-sentence";
 import { Word } from "@/word";
+import { toRaw } from "vue";
 
 export default class {
+  masteryLevel: number;
   practiceWords: Word[];
   wordIndex: number;
   sentences: Map<number, Sentence>;
@@ -12,7 +14,8 @@ export default class {
   db: LanguageDb;
   done: () => void;
 
-  constructor(db: LanguageDb, done: () => void) {
+  constructor(masteryLevel: number, db: LanguageDb, done: () => void) {
+    this.masteryLevel = masteryLevel;
     this.db = db;
     this.practiceWords = [];
     this.wordIndex = 0;
@@ -45,15 +48,16 @@ export default class {
   }
 
   correctAnswer() {
-    // TODO: Update language DB with new mastery
+    // TODO: Update runtime data
+    const word = this.word() as Word;
+    word.updateMastery(this.masteryLevel);
+    this.db.putWords([toRaw(word)]);
     this.wordIndex += 1;
     if (this.wordIndex === this.practiceWords.length) this.done();
   }
 
   async load() {
-    const practiceWords = await this.db.getPracticeByType(
-      Word.MASTERY_LEVELS.VOCAB_IN_CONTEXT
-    );
+    const practiceWords = await this.db.getPracticeByType(this.masteryLevel);
     const sentences = await this.db.getSentencesForWords(practiceWords);
     const wordPool = await this.db.getAllWords();
     const sentencePool = (await this.db.getAllSentences()).map(
@@ -63,6 +67,5 @@ export default class {
     this.sentences = sentences;
     this.wordPool = wordPool;
     this.sentencePool = sentencePool;
-    console.log(this.wordPool);
   }
 }

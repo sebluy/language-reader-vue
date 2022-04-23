@@ -5,13 +5,14 @@ import { Activity } from "@/activity";
 import SentenceActivity from "@/sentence-activity";
 import { onBeforeMount, onBeforeUpdate, reactive } from "vue";
 import { useAudioPlayerStore } from "@/stores/audio-player-store";
+import { Word } from "@/word";
 
 const props = defineProps(["db"]);
 const emit = defineEmits(["done"]);
 const audioPlayer = useAudioPlayerStore();
 
 const sentenceActivity = reactive(
-  new SentenceActivity(props.db, () => emit("done"))
+  new SentenceActivity(Word.MASTERY_LEVELS.LISTENING2, props.db, () => emit("done"))
 );
 
 onBeforeMount(() => {

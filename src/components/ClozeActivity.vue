@@ -5,13 +5,14 @@ import MainWindow from "@/components/MainWindow.vue";
 import { Activity } from "@/activity";
 import SentenceActivity from "@/sentence-activity";
 import { onBeforeMount, reactive } from "vue";
+import { Word } from "@/word";
 
 // TODO: deduplicate with other sentence activities
 const props = defineProps(["db"]);
 const emit = defineEmits(["done"]);
 
 const sentenceActivity = reactive(
-  new SentenceActivity(props.db, () => emit("done"))
+  new SentenceActivity(Word.MASTERY_LEVELS.CLOZE, props.db, () => emit("done"))
 );
 
 const wordOptions = (raw, clean) => {
