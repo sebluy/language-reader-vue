@@ -148,7 +148,9 @@ export class LanguageDb {
     return await this.db.words.toArray();
   }
 
-  async getAllSentences(): Promise<Sentence[]> {
-    return await this.db.sentences.toArray();
+  async getDefinedSentences(): Promise<Sentence[]> {
+    return (await this.db.sentences.toArray()).filter(
+      (s: Sentence) => s.definition !== ""
+    );
   }
 }

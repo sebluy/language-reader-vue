@@ -3,7 +3,14 @@ import { h } from "vue";
 import { Utility } from "@/utility";
 
 export default {
-  props: ["sentences", "wordMap", "selectedWordIndex", "highlighting", "wordOptions"],
+  props: [
+    "sentences",
+    "wordMap",
+    "selectedWordIndex",
+    "selectedSentenceIndex",
+    "highlighting",
+    "wordOptions",
+  ],
   emits: ["selectWord"],
 
   setup(props, ctx) {
@@ -47,7 +54,8 @@ export default {
           };
           return h("span", spanProps, content);
         });
-        return h("span", { key: si }, wordSpans);
+        const sentenceClass = { selected: props.selectedSentenceIndex === si };
+        return h("span", { key: si, class: sentenceClass }, wordSpans);
       });
       return h(
         "p",

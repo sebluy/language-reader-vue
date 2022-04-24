@@ -2,7 +2,7 @@
 import MainWindow from "@/components/MainWindow.vue";
 import TextView from "@/components/TextView.vue";
 import DefinitionInput from "@/components/DefinitionInput.vue";
-import { computed, onBeforeMount, onBeforeUpdate, reactive } from "vue";
+import { computed, onBeforeMount, onBeforeUpdate, onBeforeUnmount, onMounted, reactive } from "vue";
 import WordCursor from "@/WordCursor";
 import { useAudioPlayerStore } from "@/stores/audio-player-store";
 
@@ -13,6 +13,7 @@ const state = reactive({
   selectedWordCursor: new WordCursor(() => props.languageText),
   highlighting: false,
   page: props.runtimeData.currentPage,
+  marker: undefined,
 });
 
 const selectedWord = computed(() => state.selectedWordCursor.selectedWord());
@@ -44,6 +45,55 @@ const clearSelectedWordForNewPage = () => {
   }
 };
 
+const mark = () => {
+  if (state.marker === undefined) {
+    audioPlayer.play();
+    state.marker = 0;
+  } else {
+    state.marker += 1;
+  }
+  let sentences = props.languageText.sentences;
+  if (state.marker > 0) {
+    let lastSentence = sentences[state.marker - 1];
+    let lastData = props.languageText.sentenceMap.get(lastSentence.clean);
+    props.languageText.updateSentenceTimes(
+      lastData,
+      null,
+      audioPlayer.getCurrentTime()
+    );
+  }
+  if (state.marker === sentences.length) {
+    audioPlayer.pause();
+    state.marker = undefined;
+    return;
+  }
+  let sentence = sentences[state.marker];
+  let sentenceData = props.languageText.sentenceMap.get(sentence.clean);
+  props.languageText.updateSentenceTimes(
+    sentenceData,
+    audioPlayer.getCurrentTime(),
+    null
+  );
+};
+
+const keyListener = (e) => {
+  let input =
+    e.target instanceof HTMLInputElement ||
+    e.target instanceof HTMLTextAreaElement;
+  if (input) return;
+  if (e.key === "m") {
+    mark();
+  }
+};
+
+onMounted(() => {
+  document.addEventListener("keydown", keyListener);
+});
+
+onBeforeUnmount(() => {
+  document.removeEventListener("keydown", keyListener);
+});
+
 onBeforeUpdate(() => {
   clearSelectedWordForNewPage();
   updateAudioPlayer();
@@ -65,6 +115,7 @@ onBeforeMount(() => {
         :word-map="props.languageText.wordMap"
         :key="props.runtimeData.currentPage"
         :selected-word-index="state.selectedWordCursor.getIndex()"
+        :selected-sentence-index="state.marker"
         :highlighting="state.highlighting"
         @select-word="(i) => state.selectedWordCursor.setIndex(i)"
       />

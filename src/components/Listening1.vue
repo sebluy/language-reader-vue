@@ -36,7 +36,7 @@ onBeforeUpdate(() => {
 </script>
 
 <template>
-  <MainWindow v-if="sentenceActivity.word()" :title="Activity.VOCAB_IN_CONTEXT">
+  <MainWindow v-if="sentenceActivity.word()" :title="Activity.LISTENING1">
     <template #activity>
       <TextView
         :sentences="sentenceActivity.rawSentences()"

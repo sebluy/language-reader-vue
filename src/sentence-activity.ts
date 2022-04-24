@@ -60,7 +60,7 @@ export default class {
     const practiceWords = await this.db.getPracticeByType(this.masteryLevel);
     const sentences = await this.db.getSentencesForWords(practiceWords);
     const wordPool = await this.db.getAllWords();
-    const sentencePool = (await this.db.getAllSentences()).map(
+    const sentencePool = (await this.db.getDefinedSentences()).map(
       (sentence: Sentence) => sentence.definition
     );
     this.practiceWords = practiceWords;

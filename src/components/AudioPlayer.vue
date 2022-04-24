@@ -4,6 +4,9 @@ import { useAudioPlayerStore } from "@/stores/audio-player-store";
 
 const audio = ref(null);
 const store = useAudioPlayerStore();
+store.getCurrentTime = () => {
+  return audio.value.currentTime;
+};
 let startTime;
 let endTime;
 let timeout;

@@ -21,6 +21,11 @@ class AudioPlayerStore {
     this.paused = true;
     return this;
   }
+
+  getCurrentTime() {
+    // Overridden at run time by audio player
+    return undefined;
+  }
 }
 
 const store = reactive(new AudioPlayerStore());
