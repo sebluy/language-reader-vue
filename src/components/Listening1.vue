@@ -1,5 +1,6 @@
 <script setup>
 import TextView from "@/components/TextView.vue";
+import AudioTimesInput from "@/components/AudioTimesInput.vue";
 import MultipleChoice from "@/components/MultipleChoice.vue";
 import MainWindow from "@/components/MainWindow.vue";
 import { Activity } from "@/activity";
@@ -47,6 +48,13 @@ onBeforeUpdate(() => {
         :solution="sentenceActivity.word().word"
         @correct-answer="() => sentenceActivity.correctAnswer()"
       />
+    </template>
+    <template v-slot:sidebar>
+      <div class="sidebar right">
+        <div class="sidebar-group">
+          <audio-times-input :sentence="sentenceActivity.sentence()" />
+        </div>
+      </div>
     </template>
   </MainWindow>
 </template>

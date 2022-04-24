@@ -7,14 +7,14 @@ import ClozeActivity from "@/components/ClozeActivity.vue";
 import Listening1 from "@/components/Listening1.vue";
 import Listening2 from "@/components/Listening2.vue";
 import { onMounted, reactive, shallowRef } from "vue";
-import { LanguageDb } from "@/language-db";
+import { useLanguageDB } from "@/language-db";
 import { LanguageText } from "@/language-text";
 import { Utility } from "@/utility";
 import { RuntimeData } from "@/runtime-data";
 import { Activity } from "@/activity";
 import { useAudioPlayerStore } from "@/stores/audio-player-store";
 
-const db = new LanguageDb();
+const db = useLanguageDB();
 const languageText = shallowRef(undefined);
 const audioPlayer = useAudioPlayerStore();
 let runtimeData = new RuntimeData();

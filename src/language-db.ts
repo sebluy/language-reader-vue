@@ -2,7 +2,7 @@ import { RuntimeData } from "@/runtime-data";
 import { Sentence } from "@/sentence";
 import { Word } from "@/word";
 import Dexie from "dexie";
-import {Utility} from "@/utility";
+import { Utility } from "@/utility";
 
 export class LanguageDb {
   db: any;
@@ -154,3 +154,6 @@ export class LanguageDb {
     );
   }
 }
+
+const db = new LanguageDb();
+export const useLanguageDB = () => db;

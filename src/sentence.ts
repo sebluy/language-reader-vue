@@ -15,4 +15,9 @@ export class Sentence {
   getRawWords() {
     return this.sentence.split(/\s+/).filter((v) => v !== "");
   }
+
+  updateTimes(start: number | undefined, end: number | undefined) {
+    if (!Number.isNaN(start)) this.startTime = start;
+    if (!Number.isNaN(end)) this.endTime = end;
+  }
 }
