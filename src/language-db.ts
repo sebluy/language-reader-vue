@@ -48,17 +48,6 @@ export class LanguageDb {
     await this.db.sentences.clear();
     await this.db.other.delete("runtimeData");
 
-    // TODO: this can removed after migrating
-    db.words = db.words.map((word: Word) => {
-      if (word.mastery === 5)
-        word.mastery = Word.FULL_MASTERY;
-      else if (word.definition !== "")
-        word.mastery = Word.MASTERY_LEVELS.DEFINED;
-      else
-        word.mastery = 0;
-      return word;
-    });
-
     console.log("importing words");
     await this.putWords(db.words);
     console.log("done importing words");
