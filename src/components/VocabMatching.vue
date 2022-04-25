@@ -1,12 +1,13 @@
 <script setup>
 import MainWindow from "@/components/MainWindow.vue";
 import { Activity } from "@/activity";
-import {onBeforeMount, reactive, onMounted, onBeforeUnmount, toRaw} from "vue";
+import { onBeforeMount, reactive, onMounted, onBeforeUnmount, toRaw } from "vue";
 import { Word } from "@/word";
 import { Utility } from "@/utility";
+import { useLanguageDB } from "@/language-db";
 
-const props = defineProps(["db"]);
 const emit = defineEmits(["done"]);
+const db = useLanguageDB();
 
 const state = reactive({
   practiceWords: [],
@@ -16,7 +17,7 @@ const state = reactive({
 });
 
 onBeforeMount(async () => {
-  state.practiceWords = await props.db.getPracticeByType(
+  state.practiceWords = await db.getPracticeByType(
     Word.MASTERY_LEVELS.VOCAB_MATCHING
   );
   reloadGrid();
@@ -30,8 +31,16 @@ onBeforeUnmount(() => {
   document.removeEventListener("keydown", keyListener);
 });
 
+const getCell = (x, y) => {
+  return state.grid[y][x];
+};
+
+const setCell = (x, y, v) => {
+  state.grid[y][x] = v;
+};
+
 const cellClass = (x, y) => {
-  const cell = state.grid[y][x];
+  const cell = getCell(x, y);
   return {
     "matching-item": true,
     selected: cell === undefined ? false : cell.selected,
@@ -39,30 +48,32 @@ const cellClass = (x, y) => {
 };
 
 const cellValue = (x, y) => {
-  const cell = state.grid[y][x];
+  const cell = getCell(x, y);
   return cell === undefined ? "" : state.words[cell.wordIndex].definition;
 };
 
 const findCell = (predicate) => {
   for (let y = 0; y < state.words.length; y++) {
     for (let x = 0; x < state.words.length; x++) {
-      const cell = state.grid[y][x];
-      if (cell && predicate(cell)) return { x: x, y: y, ...cell };
+      const cell = getCell(x, y);
+      if (cell && predicate(cell)) return [x, y];
     }
   }
   return undefined;
 };
 
 const nextDefinition = () => {
-  const cell = findCell((c) => c.selected);
+  const [x, y] = findCell((c) => c.selected);
+  const cell = getCell(x, y);
   const nextIndex = (cell.shuffledIndex + 1) % state.words.length;
-  const next = findCell((c) => c.shuffledIndex === nextIndex);
+  const [nx, ny] = findCell((c) => c.shuffledIndex === nextIndex);
+  const nextCell = getCell(nx, ny);
   cell.selected = false;
-  next.selected = true;
+  nextCell.selected = true;
 };
 
 const swapWith = (xDel, yDel) => {
-  const { x, y } = findCell((c) => c.selected);
+  const [x, y] = findCell((c) => c.selected);
   const newX = x + xDel;
   const newY = y + yDel;
 
@@ -70,15 +81,16 @@ const swapWith = (xDel, yDel) => {
     1 <= newX && newX <= 2 && 0 <= newY && newY <= (state.words.length - 1);
   if (!valid) return;
 
-  const temp = state.grid[newY][newX];
-  state.grid[newY][newX] = state.grid[y][x];
-  state.grid[y][x] = temp;
+  const temp = getCell(newX, newY);
+  setCell(newX, newY, getCell(x, y));
+  setCell(x, y, temp);
+
   if (checkAnswer()) {
     // TODO: Update runtime data
     state.words.forEach((word) =>
       word.updateMastery(Word.MASTERY_LEVELS.VOCAB_MATCHING)
     );
-    this.db.putWords(toRaw(state.words));
+    db.putWords(state.words.map(toRaw));
     reloadGrid();
   }
 };
@@ -104,7 +116,7 @@ const reloadGrid = () => {
 
 const checkAnswer = () => {
   for (let y = 0; y < state.words.length; y++) {
-    const cell = state.grid[y][1];
+    const cell = getCell(1, y);
     if (cell === undefined || cell.wordIndex !== y) return false;
   }
   return true;

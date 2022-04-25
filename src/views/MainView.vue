@@ -141,7 +141,6 @@ onMounted(load);
     />
     <VocabMatching
       v-if="state.activity === Activity.VOCAB_MATCHING"
-      :db="db"
       @done="state.activity = Activity.READER"
     />
     <ClozeActivity
