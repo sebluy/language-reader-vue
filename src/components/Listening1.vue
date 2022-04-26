@@ -9,12 +9,11 @@ import { onBeforeMount, onBeforeUpdate, reactive } from "vue";
 import { useAudioPlayerStore } from "@/stores/audio-player-store";
 import { Word } from "@/word";
 
-const props = defineProps(["db"]);
 const emit = defineEmits(["done"]);
 const audioPlayer = useAudioPlayerStore();
 
 const sentenceActivity = reactive(
-  new SentenceActivity(Word.MASTERY_LEVELS.LISTENING1, props.db, () => emit("done"))
+  new SentenceActivity(Word.MASTERY_LEVELS.LISTENING1, () => emit("done"))
 );
 
 const wordOptions = (raw, clean) => {

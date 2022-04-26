@@ -137,7 +137,6 @@ onMounted(load);
     />
     <VocabInContext
       v-if="state.activity === Activity.VOCAB_IN_CONTEXT"
-      :db="db"
       @done="state.activity = Activity.READER"
     />
     <VocabMatching
@@ -146,17 +145,14 @@ onMounted(load);
     />
     <ClozeActivity
       v-if="state.activity === Activity.CLOZE"
-      :db="db"
       @done="state.activity = Activity.READER"
     />
     <Listening1
       v-if="state.activity === Activity.LISTENING1"
-      :db="db"
       @done="state.activity = Activity.READER"
     />
     <Listening2
       v-if="state.activity === Activity.LISTENING2"
-      :db="db"
       @done="state.activity = Activity.READER"
     />
   </div>

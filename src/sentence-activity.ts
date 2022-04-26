@@ -1,4 +1,4 @@
-import { LanguageDb } from "@/language-db";
+import { useLanguageDB } from "@/language-db";
 import { Sentence } from "@/sentence";
 import { RawSentence } from "@/raw-sentence";
 import { Word } from "@/word";
@@ -6,6 +6,7 @@ import { toRaw } from "vue";
 import { useMasteryStore } from "@/stores/mastery-store";
 
 const mastery = useMasteryStore();
+const db = useLanguageDB();
 
 export default class {
   masteryLevel: number;
@@ -14,12 +15,10 @@ export default class {
   sentences: Map<number, Sentence>;
   wordPool: Word[];
   sentencePool: string[];
-  db: LanguageDb;
   done: () => void;
 
-  constructor(masteryLevel: number, db: LanguageDb, done: () => void) {
+  constructor(masteryLevel: number, done: () => void) {
     this.masteryLevel = masteryLevel;
-    this.db = db;
     this.practiceWords = [];
     this.wordIndex = 0;
     this.sentences = new Map();
@@ -54,17 +53,17 @@ export default class {
     // TODO: Update runtime data
     const word = this.word() as Word;
     word.updateMastery(this.masteryLevel);
-    this.db.putWords([toRaw(word)]);
+    db.putWords([toRaw(word)]);
     mastery.decrement(this.masteryLevel);
     this.wordIndex += 1;
     if (this.wordIndex === this.practiceWords.length) this.done();
   }
 
   async load() {
-    const practiceWords = await this.db.getPracticeByType(this.masteryLevel);
-    const sentences = await this.db.getSentencesForWords(practiceWords);
-    const wordPool = await this.db.getAllWords();
-    const sentencePool = (await this.db.getDefinedSentences()).map(
+    const practiceWords = await db.getPracticeByType(this.masteryLevel);
+    const sentences = await db.getSentencesForWords(practiceWords);
+    const wordPool = await db.getAllWords();
+    const sentencePool = (await db.getDefinedSentences()).map(
       (sentence: Sentence) => sentence.definition
     );
     this.practiceWords = practiceWords;
