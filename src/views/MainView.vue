@@ -13,15 +13,16 @@ import { Utility } from "@/utility";
 import { RuntimeData } from "@/runtime-data";
 import { Activity } from "@/activity";
 import { useAudioPlayerStore } from "@/stores/audio-player-store";
+import { useMasteryStore } from "@/stores/mastery-store";
 
 const db = useLanguageDB();
 const languageText = shallowRef(undefined);
 const audioPlayer = useAudioPlayerStore();
+const mastery = useMasteryStore();
 let runtimeData = new RuntimeData();
 
 const state = reactive({
   runtimeData: runtimeData,
-  masteryCounts: {},
   activity: Activity.READER,
 });
 
@@ -29,7 +30,7 @@ const load = async () => {
   runtimeData = await db.getRuntimeData();
   state.runtimeData = runtimeData;
   state.runtimeData.updateForNewDay();
-  state.masteryCounts = await db.getMasteryCounts();
+  mastery.setCounts(await db.getMasteryCounts());
   console.log(state.runtimeData);
   if (state.runtimeData.openTextFile) {
     const text = await db.getTextFile();
@@ -57,6 +58,7 @@ const createLanguageText = async (text) => {
 const learnNewWord = () => {
   state.runtimeData.wordsLearnedToday += 1;
   state.runtimeData.xpToday += 1;
+  mastery.incrementAll();
   db.putRuntimeData(runtimeData);
 };
 
@@ -121,7 +123,6 @@ onMounted(load);
     <MainSidebar
       :runtime-data="state.runtimeData"
       :statistics="state.statistics"
-      :mastery-counts="state.masteryCounts"
       @open-files="openFiles"
       @update-language="updateLanguage"
       @import-database="importDatabase"

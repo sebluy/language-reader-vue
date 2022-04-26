@@ -4,11 +4,13 @@ import StatisticsTable from "@/components/StatisticsTable.vue";
 import { Word } from "@/word";
 import { Activity } from "@/activity";
 import { onBeforeUpdate } from "vue";
+import { useMasteryStore } from "@/stores/mastery-store";
+
+const mastery = useMasteryStore();
 
 const props = defineProps([
   "runtimeData",
   "statistics",
-  "masteryCounts",
 ]);
 const emit = defineEmits([
   "updateLanguage",
@@ -19,8 +21,7 @@ const emit = defineEmits([
 ]);
 onBeforeUpdate(() => console.log("Sidebar will update", props));
 const masteryOf = (type: number) => {
-  if (props.masteryCounts === undefined) return "";
-  const count = props.masteryCounts[type];
+  const count = mastery.getCount(type);
   return count > 0 ? `(${count})` : "";
 };
 </script>

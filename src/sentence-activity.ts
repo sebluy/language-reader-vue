@@ -3,6 +3,9 @@ import { Sentence } from "@/sentence";
 import { RawSentence } from "@/raw-sentence";
 import { Word } from "@/word";
 import { toRaw } from "vue";
+import { useMasteryStore } from "@/stores/mastery-store";
+
+const mastery = useMasteryStore();
 
 export default class {
   masteryLevel: number;
@@ -52,6 +55,7 @@ export default class {
     const word = this.word() as Word;
     word.updateMastery(this.masteryLevel);
     this.db.putWords([toRaw(word)]);
+    mastery.decrement(this.masteryLevel);
     this.wordIndex += 1;
     if (this.wordIndex === this.practiceWords.length) this.done();
   }
