@@ -1,43 +1,50 @@
 <script setup>
-const props = defineProps(["statistics"]);
+import { reactive, onBeforeMount } from "vue";
+import { useLanguageDB } from "@/language-db";
+import { useRuntimeData } from "@/runtime-data";
 
-const fp = (p) => (p * 100).toFixed(2) + "%";
-const s = () => props.statistics;
+const db = useLanguageDB();
+const runtimeData = useRuntimeData();
+const emit = defineEmits(["hide"]);
+const state = reactive({
+  totalWordsTranslated: 0,
+  wordsLearnedToday: 0,
+  xpToday: 0,
+  xpLast: 0,
+  loading: true,
+});
+
+onBeforeMount(async () => {
+  state.totalWordsTranslated = await db.getNumberOfWordsTranslated();
+  state.wordsLearnedToday = runtimeData.wordsLearnedToday;
+  state.xpToday = runtimeData.xpToday;
+  state.xpLast = runtimeData.xpLast;
+  state.loading = false;
+});
 </script>
 
 <template>
-  <div class="sidebar-group">
-    <table id="stats">
+  <div id="stats-modal" v-if="!state.loading">
+    <table>
       <tbody>
         <tr>
           <td>Total Words Translated</td>
-          <td>{{ s().totalWordsTranslated }}</td>
-        </tr>
-        <tr>
-          <td>New Words</td>
-          <td>{{ s().newWords }}</td>
+          <td>{{ state.totalWordsTranslated }}</td>
         </tr>
         <tr>
           <td>Words Learned Today</td>
-          <td>{{ s().wordsLearnedToday }}</td>
-        </tr>
-        <tr>
-          <td>Percent Translated</td>
-          <td>{{ fp(s().percentTranslated) }}</td>
-        </tr>
-        <tr>
-          <td>Words Mastered</td>
-          <td>{{ fp(s().percentWordsMastered) }}</td>
+          <td>{{ state.wordsLearnedToday }}</td>
         </tr>
         <tr>
           <td>Today's XP</td>
-          <td>{{ s().xpToday }}</td>
+          <td>{{ state.xpToday }}</td>
         </tr>
         <tr>
           <td>Last XP</td>
-          <td>{{ s().xpLast }}</td>
+          <td>{{ state.xpLast }}</td>
         </tr>
       </tbody>
     </table>
+    <button @click="emit('hide')">Hide</button>
   </div>
 </template>

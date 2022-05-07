@@ -17,10 +17,14 @@ export class RuntimeData {
     this.language = "es";
   }
 
-  static fromObject(o: object) {
+  static fromObject(o: object): RuntimeData {
     const data = new RuntimeData();
     Object.assign(data, o);
     return data;
+  }
+
+  load(data: RuntimeData): void {
+    Object.assign(this, data);
   }
 
   updateForNewDay() {
@@ -45,3 +49,6 @@ export class RuntimeData {
     this.openAudioFile = filename;
   }
 }
+
+const runtimeData = new RuntimeData();
+export const useRuntimeData = () => runtimeData;

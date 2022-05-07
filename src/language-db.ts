@@ -1,8 +1,8 @@
-import { RuntimeData } from "@/runtime-data";
 import { Sentence } from "@/sentence";
 import { Word } from "@/word";
 import Dexie from "dexie";
 import { Utility } from "@/utility";
+import { RuntimeData } from "@/runtime-data";
 
 export class LanguageDb {
   db: any;
@@ -30,8 +30,9 @@ export class LanguageDb {
     return this.db.sentences.get(id);
   }
 
-  getNumberOfWords(): Promise<number> {
-    return this.db.words.count();
+  async getNumberOfWordsTranslated(): Promise<number> {
+    return (await this.getAllWords()).filter((word: Word) => word.isDefined())
+      .length;
   }
 
   putWords(words: Array<Word>) {

@@ -4,9 +4,11 @@ import { RawSentence } from "@/raw-sentence";
 import { Word } from "@/word";
 import { toRaw } from "vue";
 import { useMasteryStore } from "@/stores/mastery-store";
+import { useRuntimeData } from "@/runtime-data";
 
 const mastery = useMasteryStore();
 const db = useLanguageDB();
+const runtimeData = useRuntimeData();
 
 export default class {
   masteryLevel: number;
@@ -50,10 +52,11 @@ export default class {
   }
 
   correctAnswer() {
-    // TODO: Update runtime data
     const word = this.word() as Word;
     word.updateMastery(this.masteryLevel);
     db.putWords([toRaw(word)]);
+    runtimeData.xpToday += 1;
+    db.putRuntimeData(runtimeData);
     mastery.decrement(this.masteryLevel);
     this.wordIndex += 1;
     if (this.wordIndex === this.practiceWords.length) this.done();

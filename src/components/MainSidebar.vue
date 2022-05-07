@@ -3,15 +3,12 @@ import AudioPlayer from "@/components/AudioPlayer.vue";
 import StatisticsTable from "@/components/StatisticsTable.vue";
 import { Word } from "@/word";
 import { Activity } from "@/activity";
-import { onBeforeUpdate } from "vue";
+import { onBeforeUpdate, reactive } from "vue";
 import { useMasteryStore } from "@/stores/mastery-store";
 
 const mastery = useMasteryStore();
 
-const props = defineProps([
-  "runtimeData",
-  "statistics",
-]);
+const props = defineProps(["runtimeData"]);
 const emit = defineEmits([
   "updateLanguage",
   "importDatabase",
@@ -19,6 +16,11 @@ const emit = defineEmits([
   "openFiles",
   "changeActivity",
 ]);
+
+const state = reactive({
+  isShowingStatistics: false,
+});
+
 onBeforeUpdate(() => console.log("Sidebar will update", props));
 const masteryOf = (type: number) => {
   const count = mastery.getCount(type);
@@ -41,9 +43,7 @@ const masteryOf = (type: number) => {
       />
     </div>
     <div class="sidebar-group">
-      <button @click="emit('changeActivity', Activity.READER)">
-        Reader
-      </button>
+      <button @click="emit('changeActivity', Activity.READER)">Reader</button>
       <button @click="emit('changeActivity', Activity.VOCAB_IN_CONTEXT)">
         Vocabulary in Context
         {{ masteryOf(Word.MASTERY_LEVELS.VOCAB_IN_CONTEXT) }}
@@ -65,7 +65,13 @@ const masteryOf = (type: number) => {
         {{ masteryOf(Word.MASTERY_LEVELS.LISTENING2) }}
       </button>
     </div>
-<!--    <StatisticsTable v-if="props.statistics" :statistics="props.statistics" />-->
+    <div class="sidebar-group">
+      <button @click="state.isShowingStatistics = true">Show Statistics</button>
+      <StatisticsTable
+        v-if="state.isShowingStatistics"
+        @hide="state.isShowingStatistics = false"
+      />
+    </div>
     <div class="sidebar-group">
       <button @click="emit('exportDatabase')">Export Database</button>
       <button @click="emit('importDatabase')">Import Database</button>

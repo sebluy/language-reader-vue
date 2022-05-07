@@ -5,9 +5,11 @@ import { onBeforeMount, reactive, onMounted, onBeforeUnmount, toRaw } from "vue"
 import { Word } from "@/word";
 import { Utility } from "@/utility";
 import { useLanguageDB } from "@/language-db";
+import { useRuntimeData } from "@/runtime-data";
 
 const emit = defineEmits(["done"]);
 const db = useLanguageDB();
+const runtimeData = useRuntimeData();
 
 const state = reactive({
   practiceWords: [],
@@ -86,11 +88,12 @@ const swapWith = (xDel, yDel) => {
   setCell(x, y, temp);
 
   if (checkAnswer()) {
-    // TODO: Update runtime data
     state.words.forEach((word) =>
       word.updateMastery(Word.MASTERY_LEVELS.VOCAB_MATCHING)
     );
     db.putWords(state.words.map(toRaw));
+    runtimeData.xpToday += state.words.length;
+    db.putRuntimeData(runtimeData);
     reloadGrid();
   }
 };

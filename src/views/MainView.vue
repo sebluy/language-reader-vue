@@ -10,16 +10,16 @@ import { onMounted, reactive, shallowRef } from "vue";
 import { useLanguageDB } from "@/language-db";
 import { LanguageText } from "@/language-text";
 import { Utility } from "@/utility";
-import { RuntimeData } from "@/runtime-data";
 import { Activity } from "@/activity";
 import { useAudioPlayerStore } from "@/stores/audio-player-store";
 import { useMasteryStore } from "@/stores/mastery-store";
+import { useRuntimeData } from "@/runtime-data";
 
 const db = useLanguageDB();
 const languageText = shallowRef(undefined);
 const audioPlayer = useAudioPlayerStore();
 const mastery = useMasteryStore();
-let runtimeData = new RuntimeData();
+const runtimeData = useRuntimeData();
 
 const state = reactive({
   runtimeData: runtimeData,
@@ -27,7 +27,7 @@ const state = reactive({
 });
 
 const load = async () => {
-  runtimeData = await db.getRuntimeData();
+  runtimeData.load(await db.getRuntimeData());
   state.runtimeData = runtimeData;
   state.runtimeData.updateForNewDay();
   mastery.setCounts(await db.getMasteryCounts());
@@ -35,7 +35,6 @@ const load = async () => {
   if (state.runtimeData.openTextFile) {
     const text = await db.getTextFile();
     languageText.value = await createLanguageText(text);
-    updateStats();
   }
   if (state.runtimeData.openAudioFile) {
     let audio = await db.getAudioFile();
@@ -71,7 +70,6 @@ const openFiles = async () => {
     state.runtimeData.openNewTextFile(textFile.name);
     languageText.value = await createLanguageText(text);
     db.putTextFile(text);
-    updateStats();
   }
   if (audioFile) {
     state.runtimeData.openNewAudioFile(audioFile.name);
@@ -107,14 +105,6 @@ const exportDatabase = async () => {
   Utility.download("language-db.json", JSON.stringify(object));
 };
 
-const updateStats = () => {
-  let statistics = languageText.value.updateStats();
-  statistics.wordsLearnedToday = state.runtimeData.wordsLearnedToday;
-  statistics.xpToday = state.runtimeData.xpToday;
-  statistics.xpLast = state.runtimeData.xpLast;
-  state.statistics = statistics;
-};
-
 onMounted(load);
 </script>
 
@@ -122,7 +112,6 @@ onMounted(load);
   <div>
     <MainSidebar
       :runtime-data="state.runtimeData"
-      :statistics="state.statistics"
       @open-files="openFiles"
       @update-language="updateLanguage"
       @import-database="importDatabase"

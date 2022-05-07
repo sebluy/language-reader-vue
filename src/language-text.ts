@@ -46,7 +46,6 @@ export class LanguageText {
   async load(): Promise<void> {
     await this.loadSentences();
     await this.loadWords();
-    await this.loadTotalWordsTranslated();
   }
 
   onUpdateDefinition(word: string) {
@@ -115,10 +114,6 @@ export class LanguageText {
     }
   }
 
-  async loadTotalWordsTranslated() {
-    this.totalWordsTranslated = await this.db.getNumberOfWords();
-  }
-
   updateWordDefinition(word: string, definition: string) {
     const wordData = this.wordMap.get(word);
     if (wordData === undefined) return;
@@ -145,26 +140,6 @@ export class LanguageText {
   updateMastery(words: [Word]) {
     words = words.map((word) => this.words.get(word).nextMastery());
     this.db.putWords(words);
-  }
-
-  updateStats() {
-    let countTranslated = 0;
-    let wMastered = 0;
-    let numberOfWords = 0;
-    let newWords = 0;
-    this.wordMap.forEach((data) => {
-      wMastered += data.mastery;
-      newWords += data.getNewCount();
-    });
-    const percentTranslated =
-      countTranslated === 0 ? 0 : countTranslated / numberOfWords;
-    const percentWMastered = wMastered / (this.wordMap.size * 5);
-    return {
-      newWords: newWords,
-      totalWordsTranslated: this.totalWordsTranslated,
-      percentTranslated: percentTranslated,
-      percentWordsMastered: percentWMastered,
-    };
   }
 
   async loadSentences() {
