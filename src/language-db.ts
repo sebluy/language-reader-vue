@@ -45,6 +45,7 @@ export class LanguageDb {
   async import(db: any) {
     await this.db.words.clear();
     await this.db.sentences.clear();
+    await this.db.history.clear();
     await this.db.other.delete("runtimeData");
 
     console.log("importing words");
@@ -53,6 +54,7 @@ export class LanguageDb {
     console.log("importing sentences");
     await this.db.sentences.bulkPut(db.sentences);
     console.log("done importing sentences");
+    await this.db.history.bulkPut(db.history);
     await this.db.other.put({ key: "runtimeData", value: db.runtimeData });
     console.log("done import");
     return "done";
@@ -62,7 +64,8 @@ export class LanguageDb {
     const words = await this.db.words.toArray();
     const sentences = await this.db.sentences.toArray();
     const runtimeData = await this.getRuntimeData();
-    return { runtimeData, sentences, words };
+    const history = await this.getHistory();
+    return { runtimeData, sentences, words, history };
   }
 
   getRuntimeData(): Promise<RuntimeData> {

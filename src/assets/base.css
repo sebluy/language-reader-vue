@@ -3,6 +3,7 @@
     margin-left: 90px;
     width: 250px;
     position: fixed;
+    z-index: 2;
     display: inline-block;
     vertical-align: top;
 }
@@ -11,6 +12,7 @@
     margin-left: 0;
     display: inline-block;
     vertical-align: top;
+    z-index: 1;
 }
 
 .sidebar-group {
@@ -45,7 +47,13 @@ h1, h2, h3, h4 {
     position: fixed;
     top: 50%;
     left: 50%;
+    width: 690px;
     transform: translate(-50%, -50%);
+}
+
+#stats-modal div {
+    display: inline-block;
+    padding: 10px;
 }
 
 #stats-modal table {
