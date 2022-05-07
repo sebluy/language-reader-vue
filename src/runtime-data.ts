@@ -1,19 +1,19 @@
 export class RuntimeData {
   currentPage: number;
-  xpToday: number;
-  xpLast: number;
-  xpDate: string;
   openAudioFile: string|undefined;
   openTextFile: string|undefined;
-  wordsLearnedToday: number;
+  date: string;
+  definedToday: number;
+  learnedToday: number;
+  masteredToday: number;
   language: string;
 
   constructor() {
-    this.xpToday = 0;
-    this.xpLast = 0;
-    this.xpDate = new Date().toLocaleDateString();
+    this.date = new Date().toLocaleDateString();
     this.currentPage = 0;
-    this.wordsLearnedToday = 0;
+    this.definedToday = 0;
+    this.learnedToday = 0;
+    this.masteredToday = 0;
     this.language = "es";
   }
 
@@ -28,16 +28,11 @@ export class RuntimeData {
   }
 
   updateForNewDay() {
-    if (this.isNewDay()) {
-      this.xpLast = this.xpToday;
-      this.xpToday = 0;
-      this.xpDate = new Date().toLocaleDateString();
-      this.wordsLearnedToday = 0;
-    }
+    this.date = new Date().toLocaleDateString();
   }
 
   isNewDay() {
-    return this.xpDate !== new Date().toLocaleDateString();
+    return this.date !== new Date().toLocaleDateString();
   }
 
   openNewTextFile(filename: string) {
@@ -48,6 +43,7 @@ export class RuntimeData {
   openNewAudioFile(filename: string) {
     this.openAudioFile = filename;
   }
+
 }
 
 const runtimeData = new RuntimeData();

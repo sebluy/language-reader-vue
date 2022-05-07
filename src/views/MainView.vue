@@ -14,6 +14,7 @@ import { Activity } from "@/activity";
 import { useAudioPlayerStore } from "@/stores/audio-player-store";
 import { useMasteryStore } from "@/stores/mastery-store";
 import { useRuntimeData } from "@/runtime-data";
+import { Word } from "@/word";
 
 const db = useLanguageDB();
 const languageText = shallowRef(undefined);
@@ -29,7 +30,11 @@ const state = reactive({
 const load = async () => {
   runtimeData.load(await db.getRuntimeData());
   state.runtimeData = runtimeData;
-  state.runtimeData.updateForNewDay();
+  if (runtimeData.isNewDay()) {
+    const lastDay = await db.getStatistics(runtimeData.date)
+    await db.putHistoryDay(lastDay);
+    state.runtimeData.updateForNewDay();
+  }
   mastery.setCounts(await db.getMasteryCounts());
   console.log(state.runtimeData);
   if (state.runtimeData.openTextFile) {
@@ -55,8 +60,8 @@ const createLanguageText = async (text) => {
 };
 
 const learnNewWord = () => {
-  state.runtimeData.wordsLearnedToday += 1;
-  state.runtimeData.xpToday += 1;
+  runtimeData.definedToday += 1;
+  runtimeData.learnedToday += 1 / Word.MASTERY_LEVEL_COUNT;
   mastery.incrementAll();
   db.putRuntimeData(runtimeData);
 };

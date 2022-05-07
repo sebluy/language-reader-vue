@@ -3,19 +3,22 @@ import { Word } from "@/word";
 import Dexie from "dexie";
 import { Utility } from "@/utility";
 import { RuntimeData } from "@/runtime-data";
+import { HistoryDay } from "@/history-day";
 
 export class LanguageDb {
   db: any;
 
   constructor() {
     this.db = new Dexie("LanguageDB");
-    this.db.version(2).stores({
+    this.db.version(3).stores({
       words: "word, mastery",
       sentences: "++id, sentence",
+      history: "date",
       other: "key",
     });
     this.db.words.mapToClass(Word);
     this.db.sentences.mapToClass(Sentence);
+    this.db.history.mapToClass(HistoryDay);
   }
 
   getWord(word: string): Promise<Word> {
@@ -28,11 +31,6 @@ export class LanguageDb {
 
   getSentenceById(id: number): Promise<Sentence> {
     return this.db.sentences.get(id);
-  }
-
-  async getNumberOfWordsTranslated(): Promise<number> {
-    return (await this.getAllWords()).filter((word: Word) => word.isDefined())
-      .length;
   }
 
   putWords(words: Array<Word>) {
@@ -111,7 +109,9 @@ export class LanguageDb {
       .where("mastery")
       .notEqual(Word.FULL_MASTERY)
       .toArray();
-    const w2 = w1.filter((word: Word) => word.isDefined() && !word.hasMastery(type));
+    const w2 = w1.filter(
+      (word: Word) => word.isDefined() && !word.hasMastery(type)
+    );
     Utility.shuffle(w2);
     return w2;
   }
@@ -142,6 +142,31 @@ export class LanguageDb {
     return (await this.db.sentences.toArray()).filter(
       (s: Sentence) => s.definition !== ""
     );
+  }
+
+  async getHistory(): Promise<HistoryDay[]> {
+    return await this.db.history.toArray();
+  }
+
+  async putHistoryDay(day: HistoryDay): Promise<number> {
+    return this.db.history.put(day);
+  }
+
+  async getStatistics(date: string | undefined = undefined): Promise<HistoryDay> {
+    const words = await db.getAllWords();
+    if (date === undefined) date = new Date().toLocaleDateString();
+    const stats = new HistoryDay(date, 0, 0, 0);
+    words.forEach((word) => {
+      if (word.isDefined()) stats.defined += 1;
+      if (word.isMastered()) stats.mastered += 1;
+      stats.learned += word.getMasteryPercentage();
+    });
+
+    return stats;
+  }
+
+  async getLastStatistics(): Promise<HistoryDay> {
+    return this.db.history.toCollection().last();
   }
 }
 

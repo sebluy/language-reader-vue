@@ -6,10 +6,12 @@ import { Word } from "@/word";
 import { Utility } from "@/utility";
 import { useLanguageDB } from "@/language-db";
 import { useRuntimeData } from "@/runtime-data";
+import { useMasteryStore } from "@/stores/mastery-store";
 
 const emit = defineEmits(["done"]);
 const db = useLanguageDB();
 const runtimeData = useRuntimeData();
+const mastery = useMasteryStore();
 
 const state = reactive({
   practiceWords: [],
@@ -88,11 +90,13 @@ const swapWith = (xDel, yDel) => {
   setCell(x, y, temp);
 
   if (checkAnswer()) {
-    state.words.forEach((word) =>
-      word.updateMastery(Word.MASTERY_LEVELS.VOCAB_MATCHING)
-    );
+    state.words.forEach((word) => {
+      word.updateMastery(Word.MASTERY_LEVELS.VOCAB_MATCHING);
+      runtimeData.learnedToday += 1 / Word.MASTERY_LEVEL_COUNT;
+      runtimeData.masteredToday += word.isMastered() ? 1 : 0;
+      mastery.decrement(Word.MASTERY_LEVELS.VOCAB_MATCHING);
+    });
     db.putWords(state.words.map(toRaw));
-    runtimeData.xpToday += state.words.length;
     db.putRuntimeData(runtimeData);
     reloadGrid();
   }

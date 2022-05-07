@@ -55,7 +55,8 @@ export default class {
     const word = this.word() as Word;
     word.updateMastery(this.masteryLevel);
     db.putWords([toRaw(word)]);
-    runtimeData.xpToday += 1;
+    runtimeData.learnedToday += 1 / Word.MASTERY_LEVEL_COUNT;
+    runtimeData.masteredToday += word.isMastered() ? 1 : 0;
     db.putRuntimeData(runtimeData);
     mastery.decrement(this.masteryLevel);
     this.wordIndex += 1;

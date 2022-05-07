@@ -7,18 +7,33 @@ const db = useLanguageDB();
 const runtimeData = useRuntimeData();
 const emit = defineEmits(["hide"]);
 const state = reactive({
-  totalWordsTranslated: 0,
-  wordsLearnedToday: 0,
-  xpToday: 0,
-  xpLast: 0,
+  defined: 0,
+  learned: 0,
+  mastered: 0,
+  definedToday: 0,
+  learnedToday: 0,
+  masteredToday: 0,
   loading: true,
 });
 
 onBeforeMount(async () => {
-  state.totalWordsTranslated = await db.getNumberOfWordsTranslated();
-  state.wordsLearnedToday = runtimeData.wordsLearnedToday;
-  state.xpToday = runtimeData.xpToday;
-  state.xpLast = runtimeData.xpLast;
+  const stats = await db.getStatistics();
+  const lastStats = await db.getLastStatistics();
+
+  state.defined = stats.defined;
+  state.learned = stats.learned;
+  state.mastered = stats.mastered;
+
+  if (lastStats === undefined) {
+    state.definedToday = stats.defined;
+    state.learnedToday = stats.learned;
+    state.masteredToday = stats.mastered;
+  } else {
+    state.definedToday = stats.defined - lastStats.defined;
+    state.learnedToday = stats.learned - lastStats.learned;
+    state.masteredToday = stats.mastered - lastStats.mastered;
+  }
+
   state.loading = false;
 });
 </script>
@@ -28,20 +43,28 @@ onBeforeMount(async () => {
     <table>
       <tbody>
         <tr>
-          <td>Total Words Translated</td>
-          <td>{{ state.totalWordsTranslated }}</td>
+          <td>Words Defined</td>
+          <td>{{ state.defined }}</td>
         </tr>
         <tr>
-          <td>Words Learned Today</td>
-          <td>{{ state.wordsLearnedToday }}</td>
+          <td>Words Learned</td>
+          <td>{{ state.learned.toFixed(2) }}</td>
         </tr>
         <tr>
-          <td>Today's XP</td>
-          <td>{{ state.xpToday }}</td>
+          <td>Words Mastered</td>
+          <td>{{ state.mastered }}</td>
         </tr>
         <tr>
-          <td>Last XP</td>
-          <td>{{ state.xpLast }}</td>
+          <td>Defined Today</td>
+          <td>{{ state.definedToday }}</td>
+        </tr>
+        <tr>
+          <td>Learned Today</td>
+          <td>{{ state.learnedToday.toFixed(2) }}</td>
+        </tr>
+        <tr>
+          <td>Mastered Today</td>
+          <td>{{ state.masteredToday }}</td>
         </tr>
       </tbody>
     </table>

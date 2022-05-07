@@ -13,6 +13,7 @@ export class Word {
     LISTENING2: 1 << 5,
   };
 
+  static MASTERY_LEVEL_COUNT = 6;
   static FULL_MASTERY = 0b111111;
 
   constructor(word: string, sentenceId: number) {
@@ -35,6 +36,10 @@ export class Word {
     return this.mastery & Word.MASTERY_LEVELS.DEFINED;
   }
 
+  isMastered() {
+    return this.mastery === Word.FULL_MASTERY;
+  }
+
   setDefinition(definition: string) {
     this.definition = definition;
     this.updateMastery(Word.MASTERY_LEVELS.DEFINED);
@@ -45,7 +50,7 @@ export class Word {
     for (let i = 1; i <= Word.MASTERY_LEVELS.LISTENING2; i <<= 1) {
       if (i & this.mastery) count += 1;
     }
-    return count / Object.keys(Word.MASTERY_LEVELS).length;
+    return count / Word.MASTERY_LEVEL_COUNT;
   }
 
   getNewCount() {
