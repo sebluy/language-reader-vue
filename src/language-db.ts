@@ -148,7 +148,11 @@ export class LanguageDb {
   }
 
   async getHistory(): Promise<HistoryDay[]> {
-    return await this.db.history.toArray();
+    return (await this.db.history.toArray()).sort((a: HistoryDay, b: HistoryDay) => {
+      const aDate = new Date(a.date);
+      const bDate = new Date(b.date);
+      return aDate.getTime() - bDate.getTime();
+    });
   }
 
   async putHistoryDay(day: HistoryDay): Promise<number> {
