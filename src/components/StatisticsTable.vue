@@ -48,11 +48,13 @@ onUpdated(() => {
   const myChart = new Chart(chart.value, {
     type: 'line',
     data: {
-      labels: state.history.map((day) => day.date),
-      datasets: [{
-        label: 'Defined',
-        data: state.history.map((day) => day.defined)
-      }]
+      labels: state.history.map((day) => new Date(day.date)),
+      datasets: [
+        {
+          label: "Defined",
+          data: state.history.map((day) => day.defined),
+        },
+      ],
     },
     options: {
       scales: {
