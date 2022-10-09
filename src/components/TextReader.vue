@@ -8,7 +8,7 @@ import { useAudioPlayerStore } from "@/stores/audio-player-store";
 
 const props = defineProps(["languageText", "runtimeData"]);
 const audioPlayer = useAudioPlayerStore();
-const emit = defineEmits(["changePageBy"]);
+const emit = defineEmits(["setPage"]);
 const definedPercentage = () => {
   const definitions = props.languageText.getDefinitionArray();
   return definitions.filter((str) => str !== "").length / definitions.length;
@@ -32,6 +32,14 @@ const updateWordDefinition = (...args) => {
 };
 const updateSentenceDefinition = (...args) =>
   props.languageText.updateSentenceDefinition(...args);
+
+const changePageBy = (n) => {
+  emit("setPage", props.runtimeData.currentPage + n);
+};
+
+const setPage = (e) => {
+  emit("setPage", Number(e.target.value) - 1);
+};
 
 const updateAudioPlayer = () => {
   const sentences = props.languageText.sentences;
@@ -115,7 +123,7 @@ onBeforeMount(() => {
 <template>
   <MainWindow
     title="Reader"
-    :subtitle="'Page ' + (props.runtimeData.currentPage + 1)"
+    :subtitle="`Page ${(props.runtimeData.currentPage + 1)} of  ${languageText.pages.length}`"
   >
     <template v-slot:activity>
       <TextView
@@ -156,8 +164,9 @@ onBeforeMount(() => {
           />
         </div>
         <div class="sidebar-group">
-          <button @click="emit('changePageBy', -1)">Previous Page</button>
-          <button @click="emit('changePageBy', 1)">Next Page</button>
+          <button @click="changePageBy(-1)">Previous Page</button>
+          <button @click="changePageBy(1)">Next Page</button>
+          <input placeholder="Page" @input="setPage"/>
         </div>
         <div class="sidebar-group">
           <button @click="state.highlighting = !state.highlighting">

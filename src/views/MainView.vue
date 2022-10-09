@@ -85,8 +85,7 @@ const openFiles = async () => {
   db.putRuntimeData(runtimeData);
 };
 
-const changePageBy = async (n) => {
-  let newPage = state.runtimeData.currentPage + n;
+const setPage = async (newPage) => {
   let valid = languageText.value.setPage(newPage);
   if (!valid) return;
   await languageText.value.load();
@@ -128,7 +127,7 @@ onMounted(load);
       v-if="state.activity === Activity.READER && languageText"
       :runtime-data="state.runtimeData"
       :language-text="languageText"
-      @change-page-by="changePageBy"
+      @set-page="setPage"
     />
     <VocabInContext
       v-if="state.activity === Activity.VOCAB_IN_CONTEXT"
