@@ -3,6 +3,8 @@ import { reactive, onBeforeMount, ref, onUpdated } from "vue";
 import { useLanguageDB } from "@/language-db";
 import { useRuntimeData } from "@/runtime-data";
 import { Chart, registerables } from "chart.js";
+import 'chartjs-adapter-moment';
+
 Chart.register(...registerables);
 
 const chart = ref(null);
@@ -50,15 +52,18 @@ onUpdated(() => {
     data: {
       labels: state.history.map((day) => day.date),
       datasets: [{
-        label: 'Learned',
-        data: state.history.map((day) => day.learned)
+        label: 'Defined',
+        data: state.history.map((day) => day.defined)
       }]
     },
     options: {
       scales: {
         y: {
-          beginAtZero: true
-        }
+          beginAtZero: true,
+        },
+        x: {
+          type: 'time',
+        },
       }
     }
   });
@@ -75,24 +80,8 @@ onUpdated(() => {
             <td>{{ state.defined }}</td>
           </tr>
           <tr>
-            <td>Words Learned</td>
-            <td>{{ state.learned.toFixed(2) }}</td>
-          </tr>
-          <tr>
-            <td>Words Mastered</td>
-            <td>{{ state.mastered }}</td>
-          </tr>
-          <tr>
             <td>Defined Today</td>
             <td>{{ state.definedToday }}</td>
-          </tr>
-          <tr>
-            <td>Learned Today</td>
-            <td>{{ state.learnedToday.toFixed(2) }}</td>
-          </tr>
-          <tr>
-            <td>Mastered Today</td>
-            <td>{{ state.masteredToday }}</td>
           </tr>
         </tbody>
       </table>

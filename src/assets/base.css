@@ -52,20 +52,24 @@ h1, h2, h3, h4 {
 }
 
 #stats-modal div {
-    display: inline-block;
     padding: 10px;
 }
 
 #stats-modal table {
+    margin: auto;
     font-size: medium;
     text-align: center;
-    min-width: 250px;
+    min-width: 300px;
 }
 
 #stats-modal td {
     border: 1px solid black;
     font-size: small;
     padding: 5px;
+}
+
+#stats-modal button {
+    margin: auto;
 }
 
 #word-definition span {
