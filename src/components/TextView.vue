@@ -19,8 +19,9 @@ export default {
       let wordO = props.wordMap.get(word);
       if (!props.highlighting || !wordO.isDefined())
         return { backgroundColor: "" };
-      let hue = (wordO.getMasteryPercentage() * 120).toString(10);
-      return { backgroundColor: "hsl(" + hue + ",100%,75%)" };
+      return {
+        backgroundColor: "hsl(120,100%,75%)",
+      };
     };
     return () => {
       let wi = 0;
