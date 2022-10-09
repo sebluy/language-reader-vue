@@ -43,7 +43,9 @@ const load = async () => {
   }
   if (state.runtimeData.openAudioFile) {
     let audio = await db.getAudioFile();
-    audioPlayer.src = URL.createObjectURL(audio);
+    if (audio) {
+      audioPlayer.src = URL.createObjectURL(audio);
+    }
   }
 };
 
