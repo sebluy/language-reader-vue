@@ -28,8 +28,7 @@ const state = reactive({
 });
 
 const load = async () => {
-  runtimeData.load(await db.getRuntimeData());
-  state.runtimeData = runtimeData;
+  state.runtimeData.load(await db.getRuntimeData());
   if (runtimeData.isNewDay()) {
     const lastDay = await db.getStatistics(runtimeData.date)
     await db.putHistoryDay(lastDay);

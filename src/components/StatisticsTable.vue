@@ -1,7 +1,6 @@
 <script setup>
 import { reactive, onBeforeMount, ref, onUpdated } from "vue";
 import { useLanguageDB } from "@/language-db";
-import { useRuntimeData } from "@/runtime-data";
 import { Chart, registerables } from "chart.js";
 import 'chartjs-adapter-moment';
 
@@ -9,7 +8,6 @@ Chart.register(...registerables);
 
 const chart = ref(null);
 const db = useLanguageDB();
-const runtimeData = useRuntimeData();
 const emit = defineEmits(["hide"]);
 const state = reactive({
   history: [],

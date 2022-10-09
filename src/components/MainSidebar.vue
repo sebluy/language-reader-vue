@@ -1,12 +1,7 @@
 <script setup lang="ts">
 import AudioPlayer from "@/components/AudioPlayer.vue";
 import StatisticsTable from "@/components/StatisticsTable.vue";
-import { Word } from "@/word";
-import { Activity } from "@/activity";
 import { onBeforeUpdate, reactive } from "vue";
-import { useMasteryStore } from "@/stores/mastery-store";
-
-const mastery = useMasteryStore();
 
 const props = defineProps(["runtimeData"]);
 const emit = defineEmits([
@@ -22,10 +17,6 @@ const state = reactive({
 });
 
 onBeforeUpdate(() => console.log("Sidebar will update", props));
-const masteryOf = (type: number) => {
-  const count = mastery.getCount(type);
-  return count > 0 ? `(${count})` : "";
-};
 </script>
 
 <template>
@@ -41,29 +32,6 @@ const masteryOf = (type: number) => {
         placeholder="Language"
         type="text"
       />
-    </div>
-    <div class="sidebar-group">
-      <button @click="emit('changeActivity', Activity.READER)">Reader</button>
-      <button @click="emit('changeActivity', Activity.VOCAB_IN_CONTEXT)">
-        Vocabulary in Context
-        {{ masteryOf(Word.MASTERY_LEVELS.VOCAB_IN_CONTEXT) }}
-      </button>
-      <button @click="emit('changeActivity', Activity.VOCAB_MATCHING)">
-        Vocabulary Matching
-        {{ masteryOf(Word.MASTERY_LEVELS.VOCAB_MATCHING) }}
-      </button>
-      <button @click="emit('changeActivity', Activity.CLOZE)">
-        Cloze
-        {{ masteryOf(Word.MASTERY_LEVELS.CLOZE) }}
-      </button>
-      <button @click="emit('changeActivity', Activity.LISTENING1)">
-        Listening 1
-        {{ masteryOf(Word.MASTERY_LEVELS.LISTENING1) }}
-      </button>
-      <button @click="emit('changeActivity', Activity.LISTENING2)">
-        Listening 2
-        {{ masteryOf(Word.MASTERY_LEVELS.LISTENING2) }}
-      </button>
     </div>
     <div class="sidebar-group">
       <button @click="state.isShowingStatistics = true">Show Statistics</button>
