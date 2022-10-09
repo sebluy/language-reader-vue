@@ -16,6 +16,7 @@
     "chartjs-adapter-moment": "^1.0.0",
     "dexie": "^3.2.1",
     "moment": "^2.29.4",
+    "page-lifecycle": "^0.1.2",
     "pinia": "^2.0.11",
     "vue": "^3.2.31",
     "vue-router": "^4.0.12"

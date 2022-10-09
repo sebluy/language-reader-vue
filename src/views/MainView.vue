@@ -15,6 +15,7 @@ import { useAudioPlayerStore } from "@/stores/audio-player-store";
 import { useMasteryStore } from "@/stores/mastery-store";
 import { useRuntimeData } from "@/runtime-data";
 import { Word } from "@/word";
+import { setMidnightWatch } from "@/nights-watch";
 
 const db = useLanguageDB();
 const languageText = shallowRef(undefined);
@@ -28,12 +29,9 @@ const state = reactive({
 });
 
 const load = async () => {
+  setMidnightWatch(updateForNewDay);
   state.runtimeData.load(await db.getRuntimeData());
-  if (runtimeData.isNewDay()) {
-    const lastDay = await db.getStatistics(runtimeData.date)
-    await db.putHistoryDay(lastDay);
-    state.runtimeData.updateForNewDay();
-  }
+  await updateForNewDay();
   mastery.setCounts(await db.getMasteryCounts());
   console.log(state.runtimeData);
   if (state.runtimeData.openTextFile) {
@@ -108,6 +106,15 @@ const importDatabase = async () => {
 const exportDatabase = async () => {
   let object = await db.export();
   Utility.download("language-db.json", JSON.stringify(object));
+};
+
+const updateForNewDay = async () => {
+  if (state.runtimeData.isNewDay()) {
+    console.log("Updating for new day " + new Date());
+    const lastDay = await db.getStatistics(runtimeData.date);
+    await db.putHistoryDay(lastDay);
+    state.runtimeData.updateForNewDay();
+  }
 };
 
 onMounted(load);
