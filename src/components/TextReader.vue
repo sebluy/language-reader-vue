@@ -9,11 +9,16 @@ import { useAudioPlayerStore } from "@/stores/audio-player-store";
 const props = defineProps(["languageText", "runtimeData"]);
 const audioPlayer = useAudioPlayerStore();
 const emit = defineEmits(["changePageBy"]);
+const definedPercentage = () => {
+  const definitions = props.languageText.getDefinitionArray();
+  return definitions.filter((str) => str !== "").length / definitions.length;
+};
 const state = reactive({
   selectedWordCursor: new WordCursor(() => props.languageText),
   highlighting: false,
   page: props.runtimeData.currentPage,
   marker: undefined,
+  defined: definedPercentage(),
 });
 
 const selectedWord = computed(() => state.selectedWordCursor.selectedWord());
@@ -21,8 +26,10 @@ const selectedSentence = computed(() =>
   state.selectedWordCursor.selectedSentence()
 );
 
-const updateWordDefinition = (...args) =>
+const updateWordDefinition = (...args) => {
   props.languageText.updateWordDefinition(...args);
+  state.defined = definedPercentage();
+};
 const updateSentenceDefinition = (...args) =>
   props.languageText.updateSentenceDefinition(...args);
 
@@ -97,6 +104,7 @@ onBeforeUnmount(() => {
 onBeforeUpdate(() => {
   clearSelectedWordForNewPage();
   updateAudioPlayer();
+  state.defined = definedPercentage();
 });
 
 onBeforeMount(() => {
@@ -119,6 +127,9 @@ onBeforeMount(() => {
         :highlighting="state.highlighting"
         @select-word="(i) => state.selectedWordCursor.setIndex(i)"
       />
+      <p class="footer">
+        <strong>{{ (state.defined * 100).toFixed(2) + '%' }}</strong>
+      </p>
     </template>
     <template v-slot:sidebar>
       <div class="sidebar right">

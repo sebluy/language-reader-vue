@@ -219,7 +219,7 @@ export class LanguageText {
   }
 
   getDefinitionArray() {
-    return Array.from(this.words).map((v) => v[1].definition);
+    return this.words.map((v) => v.definition);
   }
 
   leastMasteredWord(rawSentence: RawSentence) {
