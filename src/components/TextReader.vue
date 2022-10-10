@@ -2,11 +2,15 @@
 import MainWindow from "@/components/MainWindow.vue";
 import TextView from "@/components/TextView.vue";
 import DefinitionInput from "@/components/DefinitionInput.vue";
-import { computed, onBeforeMount, onBeforeUpdate, onBeforeUnmount, onMounted, reactive } from "vue";
+import { computed, onBeforeMount, onBeforeUpdate, onBeforeUnmount, onMounted, reactive, watch } from "vue";
 import WordCursor from "@/WordCursor";
 import { useAudioPlayerStore } from "@/stores/audio-player-store";
+import { useLanguageDB } from "@/language-db";
+import { CommonSubstring } from "@/common-substring";
+import { Utility } from "@/utility";
 
 const props = defineProps(["languageText", "runtimeData"]);
+const db = useLanguageDB();
 const audioPlayer = useAudioPlayerStore();
 const emit = defineEmits(["setPage"]);
 const definedPercentage = () => {
@@ -19,12 +23,27 @@ const state = reactive({
   page: props.runtimeData.currentPage,
   marker: undefined,
   defined: definedPercentage(),
+  similarWords: [],
+});
+
+const substringLookup = new CommonSubstring(4, 5);
+Utility.benchmark(async () => {
+  const wordPool = (await db.getAllWords()).filter((word) => word.isDefined());
+  wordPool.forEach((word) => {
+    substringLookup.addWord(word.word);
+  });
 });
 
 const selectedWord = computed(() => state.selectedWordCursor.selectedWord());
 const selectedSentence = computed(() =>
   state.selectedWordCursor.selectedSentence()
 );
+
+watch(selectedWord, async (word) => {
+  state.similarWords = await Promise.all(
+    substringLookup.lookup(word.word).map((match) => db.getWord(match))
+  );
+});
 
 const updateWordDefinition = (...args) => {
   props.languageText.updateWordDefinition(...args);
@@ -142,6 +161,13 @@ onBeforeMount(() => {
     <template v-slot:sidebar>
       <div class="sidebar right">
         <div class="sidebar-group">
+          <div class="matching-words">
+            <ul>
+              <li :key="word.word" v-for="word in state.similarWords">
+                {{ `${word.word} - ${word.definition}` }}
+              </li>
+            </ul>
+          </div>
           <DefinitionInput
             id="word-definition"
             :key="selectedWord.word"
