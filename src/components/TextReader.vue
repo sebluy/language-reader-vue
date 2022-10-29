@@ -13,16 +13,20 @@ const props = defineProps(["languageText", "runtimeData"]);
 const db = useLanguageDB();
 const audioPlayer = useAudioPlayerStore();
 const emit = defineEmits(["setPage"]);
-const definedPercentage = () => {
+const pageStats = () => {
   const definitions = props.languageText.getDefinitionArray();
-  return definitions.filter((str) => str !== "").length / definitions.length;
+  const defined = definitions.filter((str) => str !== "").length;
+  const total = definitions.length;
+  const notDefined = total - defined;
+  const percentage = defined / total;
+  return { defined, total, notDefined, percentage };
 };
 const state = reactive({
   selectedWordCursor: new WordCursor(() => props.languageText),
   highlighting: false,
   page: props.runtimeData.currentPage,
   marker: undefined,
-  defined: definedPercentage(),
+  pageStats: pageStats(),
   similarWords: [],
 });
 
@@ -47,7 +51,7 @@ watch(selectedWord, async (word) => {
 
 const updateWordDefinition = (...args) => {
   props.languageText.updateWordDefinition(...args);
-  state.defined = definedPercentage();
+  state.pageStats = pageStats();
 };
 const updateSentenceDefinition = (...args) =>
   props.languageText.updateSentenceDefinition(...args);
@@ -131,7 +135,7 @@ onBeforeUnmount(() => {
 onBeforeUpdate(() => {
   clearSelectedWordForNewPage();
   updateAudioPlayer();
-  state.defined = definedPercentage();
+  state.pageStats = pageStats();
 });
 
 onBeforeMount(() => {
@@ -155,7 +159,11 @@ onBeforeMount(() => {
         @select-word="(i) => state.selectedWordCursor.setIndex(i)"
       />
       <p class="footer">
-        <strong>{{ (state.defined * 100).toFixed(2) + '%' }}</strong>
+        <strong>
+          {{ state.pageStats.defined }} of {{ state.pageStats.total }},
+          {{ state.pageStats.notDefined }} remaining,
+          {{ (state.pageStats.percentage * 100).toFixed(2) + '%' }}
+        </strong>
       </p>
     </template>
     <template v-slot:sidebar>
