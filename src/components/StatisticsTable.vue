@@ -11,13 +11,12 @@ const db = useLanguageDB();
 const emit = defineEmits(["hide"]);
 const state = reactive({
   history: [],
+  definedByDay: [],
   defined: 0,
-  learned: 0,
-  mastered: 0,
   definedToday: 0,
-  learnedToday: 0,
-  masteredToday: 0,
+  maxDefined: 0,
   loading: true,
+  cumulative: true,
 });
 
 onBeforeMount(async () => {
@@ -27,32 +26,49 @@ onBeforeMount(async () => {
   state.history.push(stats);
 
   state.defined = stats.defined;
-  state.learned = stats.learned;
-  state.mastered = stats.mastered;
 
   if (lastStats === undefined) {
     state.definedToday = stats.defined;
-    state.learnedToday = stats.learned;
-    state.masteredToday = stats.mastered;
   } else {
     state.definedToday = stats.defined - lastStats.defined;
-    state.learnedToday = stats.learned - lastStats.learned;
-    state.masteredToday = stats.mastered - lastStats.mastered;
   }
+
+  for (let i = 1; i < state.history.length; i++) {
+    const previousDay = state.history[i - 1];
+    const day = state.history[i];
+    state.definedByDay.push({
+      date: day.date,
+      defined: day.defined - previousDay.defined,
+    });
+  }
+
+  state.maxDefined = Math.max(...state.definedByDay.map((day) => day.defined));
 
   state.loading = false;
 });
 
 onUpdated(() => {
   if (!chart.value) return;
-  const myChart = new Chart(chart.value, {
+  const existingChart = Chart.getChart(chart.value);
+  if (existingChart) existingChart.destroy();
+
+  let labels, data;
+  if (state.cumulative) {
+    labels = state.history.map((day) => new Date(day.date));
+    data = state.history.map((day) => day.defined);
+  } else {
+    labels = state.definedByDay.map((day) => new Date(day.date));
+    data = state.definedByDay.map((day) => day.defined);
+  }
+
+  new Chart(chart.value, {
     type: 'line',
     data: {
-      labels: state.history.map((day) => new Date(day.date)),
+      labels,
       datasets: [
         {
           label: "Defined",
-          data: state.history.map((day) => day.defined),
+          data,
         },
       ],
     },
@@ -67,7 +83,12 @@ onUpdated(() => {
       }
     }
   });
-})
+});
+
+const toggleCumulative = () => {
+  state.cumulative = !state.cumulative;
+};
+
 </script>
 
 <template>
@@ -83,12 +104,19 @@ onUpdated(() => {
             <td>Defined Today</td>
             <td>{{ state.definedToday }}</td>
           </tr>
+          <tr>
+            <td>Maximum Daily Defined</td>
+            <td>{{ state.maxDefined }}</td>
+          </tr>
         </tbody>
       </table>
     </div>
     <div>
       <canvas ref="chart" width="400" height="200"></canvas>
     </div>
+    <button @click="toggleCumulative">
+      {{ state.cumulative ? "Per Day" : "Cumulative" }}
+    </button>
     <button @click="emit('hide')">Hide</button>
   </div>
 </template>
