@@ -3,7 +3,7 @@ export class RuntimeData {
   openAudioFile: string|undefined;
   openTextFile: string|undefined;
   date: string;
-  definedToday: number;
+  definedToday: [];
   learnedToday: number;
   masteredToday: number;
   language: string;
@@ -11,7 +11,7 @@ export class RuntimeData {
   constructor() {
     this.date = new Date().toLocaleDateString();
     this.currentPage = 0;
-    this.definedToday = 0;
+    this.definedToday = [];
     this.learnedToday = 0;
     this.masteredToday = 0;
     this.language = "es";
@@ -29,6 +29,7 @@ export class RuntimeData {
 
   updateForNewDay() {
     this.date = new Date().toLocaleDateString();
+    this.definedToday = [];
   }
 
   isNewDay() {

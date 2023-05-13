@@ -10,6 +10,7 @@ const emit = defineEmits([
   "exportDatabase",
   "openFiles",
   "changeActivity",
+  "exportDefinedToday",
 ]);
 
 const state = reactive({
@@ -43,6 +44,9 @@ onBeforeUpdate(() => console.log("Sidebar will update", props));
     <div class="sidebar-group">
       <button @click="emit('exportDatabase')">Export Database</button>
       <button @click="emit('importDatabase')">Import Database</button>
+      <button @click="emit('exportDefinedToday')">
+        Export Defined Today ({{ props.runtimeData.definedToday.length }})
+      </button>
     </div>
   </div>
 </template>

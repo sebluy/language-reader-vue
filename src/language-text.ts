@@ -20,7 +20,7 @@ export class LanguageText {
   words: Array<Word>;
   wordMap: Map<string, Word>;
   promise: Promise<void>;
-  onNewWordLearned: () => void;
+  onNewWordLearned: (word: Word) => void;
 
   constructor(
     db: LanguageDb,
@@ -118,11 +118,12 @@ export class LanguageText {
     const wordData = this.wordMap.get(word);
     if (wordData === undefined) return;
     if (wordData.definition === definition) return;
-    if (!wordData.isDefined()) {
-      this.totalWordsTranslated += 1;
-      this.onNewWordLearned();
-    }
+    const isNewWord = !wordData.isDefined();
     wordData.setDefinition(definition);
+    if (isNewWord) {
+      this.totalWordsTranslated += 1;
+      this.onNewWordLearned(wordData);
+    }
     console.log("Updating definition... for " + word + " to " + definition);
     this.db.putWords([wordData]);
     this.onUpdateDefinition(word);

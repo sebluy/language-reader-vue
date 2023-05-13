@@ -58,8 +58,8 @@ const createLanguageText = async (text) => {
   return languageText;
 };
 
-const learnNewWord = () => {
-  runtimeData.definedToday += 1;
+const learnNewWord = (word) => {
+  runtimeData.definedToday.push(word);
   runtimeData.learnedToday += 1 / Word.MASTERY_LEVEL_COUNT;
   mastery.incrementAll();
   db.putRuntimeData(runtimeData);
@@ -108,6 +108,13 @@ const exportDatabase = async () => {
   Utility.download("language-db.json", JSON.stringify(object));
 };
 
+const exportDefinedToday = async () => {
+  const csv = runtimeData.definedToday
+    .map((word) => `"${word.word}","${word.definition}"`)
+    .join("\n");
+  Utility.download("defined-today.csv", csv);
+};
+
 const updateForNewDay = async () => {
   if (state.runtimeData.isNewDay()) {
     console.log("Updating for new day " + new Date());
@@ -128,6 +135,7 @@ onMounted(load);
       @update-language="updateLanguage"
       @import-database="importDatabase"
       @export-database="exportDatabase"
+      @export-defined-today="exportDefinedToday"
       @change-activity="(activity) => (state.activity = activity)"
     />
     <TextReader
