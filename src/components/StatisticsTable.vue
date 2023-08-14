@@ -1,8 +1,8 @@
 <script setup>
-import { reactive, onBeforeMount, ref, onUpdated } from "vue";
+import {reactive, onBeforeMount, ref, onUpdated, computed} from "vue";
 import { useLanguageDB } from "@/language-db";
 import { Chart, registerables } from "chart.js";
-import 'chartjs-adapter-moment';
+import "chartjs-adapter-moment";
 
 Chart.register(...registerables);
 
@@ -12,11 +12,12 @@ const emit = defineEmits(["hide"]);
 const state = reactive({
   history: [],
   definedByDay: [],
+  definedByWeek: [],
   defined: 0,
   definedToday: 0,
   maxDefined: 0,
   loading: true,
-  cumulative: true,
+  mode: "Cumulative",
 });
 
 onBeforeMount(async () => {
@@ -33,12 +34,36 @@ onBeforeMount(async () => {
     state.definedToday = stats.defined - lastStats.defined;
   }
 
+  let dateIter = new Date(state.history[0].date);
   for (let i = 1; i < state.history.length; i++) {
     const previousDay = state.history[i - 1];
     const day = state.history[i];
+
+    while (dateIter < new Date(day.date)) {
+      state.definedByDay.push({
+        date: dateIter.toLocaleDateString(),
+        defined: 0,
+      });
+      dateIter.setDate(dateIter.getDate() + 1);
+    }
+
     state.definedByDay.push({
       date: day.date,
       defined: day.defined - previousDay.defined,
+    });
+    dateIter.setDate(dateIter.getDate() + 1);
+  }
+
+  let filterSum = 0;
+  for (let i = 0; i < state.definedByDay.length; i++) {
+    filterSum += state.definedByDay[i].defined;
+    if (i >= 7) {
+      filterSum -= state.definedByDay[i - 7].defined;
+    }
+
+    state.definedByWeek.push({
+      date: state.definedByDay[i].date,
+      defined: filterSum,
     });
   }
 
@@ -52,17 +77,20 @@ onUpdated(() => {
   const existingChart = Chart.getChart(chart.value);
   if (existingChart) existingChart.destroy();
 
-  let labels, data;
-  if (state.cumulative) {
-    labels = state.history.map((day) => new Date(day.date));
-    data = state.history.map((day) => day.defined);
+  let collection;
+  if (state.mode === "Cumulative") {
+    collection = state.history;
+  } else if (state.mode === "Per Day") {
+    collection = state.definedByDay;
   } else {
-    labels = state.definedByDay.map((day) => new Date(day.date));
-    data = state.definedByDay.map((day) => day.defined);
+    collection = state.definedByWeek;
   }
 
+  const labels = collection.map((day) => new Date(day.date));
+  const data = collection.map((day) => day.defined);
+
   new Chart(chart.value, {
-    type: 'line',
+    type: "line",
     data: {
       labels,
       datasets: [
@@ -78,17 +106,26 @@ onUpdated(() => {
           beginAtZero: true,
         },
         x: {
-          type: 'time',
+          type: "time",
         },
-      }
-    }
+      },
+    },
   });
 });
 
-const toggleCumulative = () => {
-  state.cumulative = !state.cumulative;
-};
+const nextMode = computed(() => {
+  if (state.mode === "Cumulative") {
+    return "Per Day";
+  } else if (state.mode === "Per Day") {
+    return "Per Week";
+  } else {
+    return "Cumulative";
+  }
+});
 
+const changeMode = () => {
+  state.mode = nextMode.value;
+};
 </script>
 
 <template>
@@ -114,8 +151,8 @@ const toggleCumulative = () => {
     <div>
       <canvas ref="chart" width="400" height="200"></canvas>
     </div>
-    <button @click="toggleCumulative">
-      {{ state.cumulative ? "Per Day" : "Cumulative" }}
+    <button @click="changeMode">
+      {{ nextMode }}
     </button>
     <button @click="emit('hide')">Hide</button>
   </div>
