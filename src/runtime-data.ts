@@ -7,6 +7,7 @@ export class RuntimeData {
   learnedToday: number;
   masteredToday: number;
   language: string;
+  sentenceIndex: number;
 
   constructor() {
     this.date = new Date().toLocaleDateString();
@@ -15,6 +16,7 @@ export class RuntimeData {
     this.learnedToday = 0;
     this.masteredToday = 0;
     this.language = "es";
+    this.sentenceIndex = 0;
   }
 
   static fromObject(o: object): RuntimeData {
@@ -39,6 +41,7 @@ export class RuntimeData {
   openNewTextFile(filename: string) {
     this.openTextFile = filename;
     this.currentPage = 0;
+    this.sentenceIndex = 0;
   }
 
   openNewAudioFile(filename: string) {

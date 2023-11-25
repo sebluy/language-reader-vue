@@ -67,11 +67,11 @@ const keyListener = (e) => {
 };
 
 onMounted(() => {
-  document.addEventListener("keydown", keyListener);
+  // document.addEventListener("keydown", keyListener);
 });
 
 onBeforeUnmount(() => {
-  document.removeEventListener("keydown", keyListener);
+  // document.removeEventListener("keydown", keyListener);
 });
 
 watch(store, () => {

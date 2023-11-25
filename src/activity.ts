@@ -1,5 +1,6 @@
 export class Activity {
   static READER = "Reader";
+  static PROJECT_X = "Project X";
   static VOCAB_IN_CONTEXT = "Vocabulary in Context";
   static VOCAB_MATCHING = "Vocabulary Matching";
   static CLOZE = "Cloze";
